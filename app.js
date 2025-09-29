@@ -2182,10 +2182,12 @@ async function sendApprovalNotification(application) {
 }
 
 function showVoteApplicationModal(application) {
+    console.log('showVoteApplicationModal called with:', application);
     currentVotingApplication = application;
 
     // 填充申请信息到投票模态框
     const modal = document.getElementById('voteNotificationModal');
+    console.log('Modal element found:', modal);
     const applicantName = document.getElementById('applicantName');
     const applicantAvatar = document.getElementById('applicantAvatar');
     const applicationMessage = document.getElementById('voteApplicationMessage');
@@ -2471,6 +2473,7 @@ window.deleteComment = deleteComment;
 window.markNotificationAsRead = markNotificationAsRead;
 window.deleteNotification = deleteNotification;
 window.filterNotifications = filterNotifications;
+window.handleNotificationClick = handleNotificationClick;
 
 // 通知系统功能实现
 async function loadNotifications() {
@@ -2607,8 +2610,13 @@ function getNotificationTypeText(type) {
 }
 
 async function handleNotificationClick(notificationId) {
+    console.log('handleNotificationClick called with ID:', notificationId);
     const notification = notifications.find(n => n.id === notificationId);
-    if (!notification) return;
+    console.log('Found notification:', notification);
+    if (!notification) {
+        console.log('No notification found');
+        return;
+    }
 
     // 标记为已读
     if (!notification.is_read) {
@@ -2617,19 +2625,29 @@ async function handleNotificationClick(notificationId) {
 
     // 根据通知类型处理点击事件
     if (notification.type === 'group_application') {
+        console.log('Processing group application notification');
         // 处理小组申请通知 - 显示投票界面
-        if (notification.related_group_id && notification.related_application_id) {
-            try {
-                // 获取申请详情
-                const { data: application, error } = await client.database
+        try {
+            // 从通知消息中提取小组名称
+            const groupNameMatch = notification.message.match(/"([^"]+)"/);
+            const groupName = groupNameMatch ? groupNameMatch[1] : null;
+            console.log('Extracted group name:', groupName);
+
+            if (groupName) {
+                console.log('Querying for applications...');
+                // 查找该小组的待处理申请
+                const { data: applications, error } = await client.database
                     .from('group_applications')
                     .select(`
                         *,
-                        groups(name, description, avatar_url),
+                        groups!inner(name, description, avatar_url),
                         users(nickname, avatar_url)
                     `)
-                    .eq('id', notification.related_application_id)
-                    .single();
+                    .eq('groups.name', groupName)
+                    .eq('status', 'pending')
+                    .eq('applicant_id', notification.sender_id);
+
+                console.log('Query result:', { applications, error });
 
                 if (error) {
                     console.error('Error fetching application:', error);
@@ -2637,13 +2655,20 @@ async function handleNotificationClick(notificationId) {
                     return;
                 }
 
-                if (application) {
-                    showVoteApplicationModal(application);
+                if (applications && applications.length > 0) {
+                    console.log('Showing vote modal for application:', applications[0]);
+                    showVoteApplicationModal(applications[0]);
+                } else {
+                    console.log('No applications found');
+                    showToast('申请不存在或已处理', 'info');
                 }
-            } catch (error) {
-                console.error('Error handling group application notification:', error);
-                showToast('处理申请通知时出错', 'error');
+            } else {
+                console.log('Could not extract group name');
+                showToast('无法解析申请信息', 'error');
             }
+        } catch (error) {
+            console.error('Error handling group application notification:', error);
+            showToast('处理申请通知时出错', 'error');
         }
     } else if (notification.type === 'group_approval') {
         // 处理申请通过通知 - 可以跳转到小组页面
