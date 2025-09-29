@@ -299,6 +299,9 @@ moment/
 ├── app.js             # 主应用逻辑
 ├── package.json       # 项目配置
 ├── vite.config.js     # 构建配置
+├── netlify.toml       # Netlify 部署配置
+├── public/            # 静态资源目录
+│   └── i18n.js        # 多语言配置文件
 ├── functions/          # Edge Functions 目录
 │   ├── apply-to-group.js           # 小组申请处理
 │   ├── submit-vote.js              # 投票提交处理
