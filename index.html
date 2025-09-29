@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- i18n -->
+    <script src="./i18n.js"></script>
 </head>
 <body>
     <div id="app">
@@ -29,52 +31,63 @@
                     </h1>
                 </div>
                 <div class="nav-actions">
-                    <button class="btn-secondary" onclick="showLogin()">登录</button>
-                    <button class="btn-primary" onclick="showRegister()">开始使用</button>
+                    <div class="language-switcher">
+                        <button class="lang-btn" onclick="toggleLanguageMenu()">
+                            <i data-lucide="globe"></i>
+                            <span id="currentLangDisplay">中文</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="lang-menu hidden" id="langMenu">
+                            <button class="lang-option" onclick="changeLanguage('zh')">简体中文</button>
+                            <button class="lang-option" onclick="changeLanguage('en')">English</button>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="showLogin()" data-i18n="common.login">登录</button>
+                    <button class="btn-primary" onclick="showRegister()" data-i18n="homepage.startNow">开始使用</button>
                 </div>
             </nav>
 
             <main class="homepage-main">
                 <section class="hero">
                     <div class="hero-content">
-                        <h1 class="hero-title">记录你的灵感瞬间</h1>
-                        <p class="hero-subtitle">在灵感闪现的时刻，捕捉每一个珍贵的想法，与志同道合的朋友分享，让思想在小圈子中自由流淌</p>
+                        <h1 class="hero-title" data-i18n="homepage.heroTitle">记录你的灵感瞬间</h1>
+                        <p class="hero-subtitle" data-i18n="homepage.heroSubtitle">在灵感闪现的时刻，捕捉每一个珍贵的想法，与志同道合的朋友分享，让思想在小圈子中自由流淌</p>
                         <div class="hero-actions">
-                            <button class="btn-primary large" onclick="showRegister()">立即开始</button>
-                            <button class="btn-secondary large" onclick="scrollToFeatures()">了解更多</button>
+                            <button class="btn-primary large" onclick="showRegister()" data-i18n="homepage.startNow">立即开始</button>
+                            <button class="btn-secondary large" onclick="scrollToFeatures()" data-i18n="homepage.learnMore">了解更多</button>
                         </div>
                     </div>
                     <div class="hero-visual">
                         <div class="inspiration-cards">
                             <div class="inspiration-card floating">
                                 <div class="card-icon"><i data-lucide="lightbulb"></i></div>
-                                <div class="card-text">突然想到一个创意想法...</div>
+                                <div class="card-text" data-i18n="homepage.inspirationCard1">突然想到一个创意想法...</div>
                             </div>
                             <div class="inspiration-card floating delay-1">
                                 <div class="card-icon"><i data-lucide="heart"></i></div>
-                                <div class="card-text">今天遇到让我感动的事情</div>
+                                <div class="card-text" data-i18n="homepage.inspirationCard2">今天遇到让我感动的事情</div>
                             </div>
                             <div class="inspiration-card floating delay-2">
                                 <div class="card-icon"><i data-lucide="bookmark"></i></div>
-                                <div class="card-text">值得记录的美好瞬间</div>
+                                <div class="card-text" data-i18n="homepage.inspirationCard3">值得记录的美好瞬间</div>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <section id="features" class="features">
-                    <h2 class="features-title">为什么选择 Moment？</h2>
+                    <h2 class="features-title" data-i18n="homepage.whyChoose">为什么选择 Moment？</h2>
                     <div class="features-grid">
                         <div class="feature-card">
                             <div class="feature-icon">
                                 <i data-lucide="edit-3"></i>
                             </div>
-                            <h3>随时记录你的所思所想</h3>
-                            <p>无论是突然的创意闪现，还是深刻的人生感悟，都能在 Moment 中快速记录，永不错过任何一个珍贵的想法。</p>
+                            <h3 data-i18n="homepage.feature1Title">随时记录你的所思所想</h3>
+                            <p data-i18n="homepage.feature1Desc">无论是突然的创意闪现，还是深刻的人生感悟，都能在 Moment 中快速记录，永不错过任何一个珍贵的想法。</p>
                             <ul class="feature-details">
-                                <li><i data-lucide="check"></i> 支持文字、图片多媒体记录</li>
-                                <li><i data-lucide="check"></i> 智能分类和标签管理</li>
-                                <li><i data-lucide="check"></i> 心情状态追踪记录</li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature1Item1">支持文字、图片多媒体记录</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature1Item2">智能分类和标签管理</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature1Item3">心情状态追踪记录</span></li>
                             </ul>
                         </div>
 
@@ -82,12 +95,12 @@
                             <div class="feature-icon">
                                 <i data-lucide="users"></i>
                             </div>
-                            <h3>与小圈子私密分享</h3>
-                            <p>创建专属的私密小组，与真正懂你的朋友分享内心的想法。在安全的环境中，让思想碰撞出更多火花。</p>
+                            <h3 data-i18n="homepage.feature2Title">与小圈子私密分享</h3>
+                            <p data-i18n="homepage.feature2Desc">创建专属的私密小组，与真正懂你的朋友分享内心的想法。在安全的环境中，让思想碰撞出更多火花。</p>
                             <ul class="feature-details">
-                                <li><i data-lucide="check"></i> 私密小组，安全分享</li>
-                                <li><i data-lucide="check"></i> 精准的兴趣匹配</li>
-                                <li><i data-lucide="check"></i> 深度互动，真实连接</li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature2Item1">私密小组，安全分享</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature2Item2">精准的兴趣匹配</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature2Item3">深度互动，真实连接</span></li>
                             </ul>
                         </div>
 
@@ -95,12 +108,12 @@
                             <div class="feature-icon">
                                 <i data-lucide="vote"></i>
                             </div>
-                            <h3>民主投票决定成员加入</h3>
-                            <p>每个新成员的加入都由全体组员投票决定，确保小组的品质和氛围。真正的民主，真正的归属感。</p>
+                            <h3 data-i18n="homepage.feature3Title">民主投票决定成员加入</h3>
+                            <p data-i18n="homepage.feature3Desc">每个新成员的加入都由全体组员投票决定，确保小组的品质和氛围。真正的民主，真正的归属感。</p>
                             <ul class="feature-details">
-                                <li><i data-lucide="check"></i> 全员参与投票决策</li>
-                                <li><i data-lucide="check"></i> 智能投票门槛调节</li>
-                                <li><i data-lucide="check"></i> 保障小组质量和氛围</li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature3Item1">全员参与投票决策</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature3Item2">智能投票门槛调节</span></li>
+                                <li><i data-lucide="check"></i> <span data-i18n="homepage.feature3Item3">保障小组质量和氛围</span></li>
                             </ul>
                         </div>
                     </div>
@@ -108,17 +121,17 @@
 
                 <section class="cta">
                     <div class="cta-content">
-                        <h2>开始你的灵感记录之旅</h2>
-                        <p>加入 Moment，让每一个想法都有价值，让每一份灵感都被珍藏</p>
-                        <button class="btn-primary large" onclick="showRegister()">立即注册</button>
-                        <p class="cta-note">已有账户？<a href="#" onclick="showLogin()">立即登录</a></p>
+                        <h2 data-i18n="homepage.ctaTitle">开始你的灵感记录之旅</h2>
+                        <p data-i18n="homepage.ctaSubtitle">加入 Moment，让每一个想法都有价值，让每一份灵感都被珍藏</p>
+                        <button class="btn-primary large" onclick="showRegister()" data-i18n="homepage.ctaRegister">立即注册</button>
+                        <p class="cta-note" data-i18n="homepage.ctaLogin">已有账户？<a href="#" onclick="showLogin()">立即登录</a></p>
                     </div>
                 </section>
             </main>
 
             <footer class="homepage-footer">
                 <div class="footer-content">
-                    <p>&copy; 2024 Moment. 让灵感永存，让思想发光。</p>
+                    <p data-i18n="homepage.footerText">&copy; 2024 Moment. 让灵感永存，让思想发光。</p>
                 </div>
             </footer>
         </div>
@@ -126,6 +139,19 @@
         <!-- 登录页面 -->
         <div id="loginPage" class="page hidden">
             <div class="login-container">
+                <div class="login-header">
+                    <div class="language-switcher login-lang-switcher">
+                        <button class="lang-btn" onclick="toggleLanguageMenu()" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border-color: rgba(102, 126, 234, 0.3);">
+                            <i data-lucide="globe"></i>
+                            <span id="loginCurrentLangDisplay">中文</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="lang-menu hidden" id="loginLangMenu">
+                            <button class="lang-option" onclick="changeLanguageInLogin('zh')">简体中文</button>
+                            <button class="lang-option" onclick="changeLanguageInLogin('en')">English</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="logo">
                     <h1 class="brand-logo" style="color: #667eea;">
                         <span class="logo-icon">
@@ -137,36 +163,36 @@
                         </span>
                         <span>Moment</span>
                     </h1>
-                    <p>记录你的灵感瞬间</p>
+                    <p data-i18n="common.slogan">记录你的灵感瞬间</p>
                 </div>
 
                 <div class="auth-tabs">
-                    <button class="tab-btn active" data-tab="login">登录</button>
-                    <button class="tab-btn" data-tab="register">注册</button>
+                    <button class="tab-btn active" data-tab="login" data-i18n="auth.loginTitle">登录</button>
+                    <button class="tab-btn" data-tab="register" data-i18n="auth.registerTitle">注册</button>
                 </div>
 
                 <div class="auth-form">
                     <form id="loginForm" class="form-content active">
                         <div class="form-group">
-                            <input type="email" id="loginEmail" placeholder="邮箱" required>
+                            <input type="email" id="loginEmail" data-i18n="auth.email" placeholder="邮箱" required>
                         </div>
                         <div class="form-group">
-                            <input type="password" id="loginPassword" placeholder="密码" required>
+                            <input type="password" id="loginPassword" data-i18n="auth.password" placeholder="密码" required>
                         </div>
-                        <button type="submit" class="btn-primary">登录</button>
+                        <button type="submit" class="btn-primary" data-i18n="auth.loginButton">登录</button>
                     </form>
 
                     <form id="registerForm" class="form-content">
                         <div class="form-group">
-                            <input type="email" id="registerEmail" placeholder="邮箱" required>
+                            <input type="email" id="registerEmail" data-i18n="auth.email" placeholder="邮箱" required>
                         </div>
                         <div class="form-group">
-                            <input type="password" id="registerPassword" placeholder="密码" required>
+                            <input type="password" id="registerPassword" data-i18n="auth.password" placeholder="密码" required>
                         </div>
                         <div class="form-group">
-                            <input type="text" id="registerNickname" placeholder="昵称" required>
+                            <input type="text" id="registerNickname" data-i18n="auth.nickname" placeholder="昵称" required>
                         </div>
-                        <button type="submit" class="btn-primary">注册</button>
+                        <button type="submit" class="btn-primary" data-i18n="auth.registerButton">注册</button>
                     </form>
                 </div>
 

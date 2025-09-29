@@ -109,6 +109,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
     setupEventListeners();
 
+    // 初始化多语言
+    if (window.i18n) {
+        window.i18n.updatePageContent();
+        updateLanguageDisplay();
+    }
+
     // 先检查登录状态，根据状态决定显示哪个页面
     const isLoggedIn = await checkAuthStatus();
 
@@ -205,7 +211,7 @@ async function handleLogin(e) {
         }
 
         currentUser = data;
-        showToast('登录成功！', 'success');
+        showToast('auth.loginSuccess', 'success');
         showMainApp();
         await loadInspirations();
     } catch (error) {
@@ -243,7 +249,7 @@ async function handleRegister(e) {
         });
 
         currentUser = authData;
-        showToast('注册成功！', 'success');
+        showToast('auth.registerSuccess', 'success');
         showMainApp();
         await loadInspirations();
     } catch (error) {
@@ -1178,7 +1184,9 @@ function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
     const messageEl = document.getElementById('toastMessage');
 
-    messageEl.textContent = message;
+    // 如果消息是翻译键，则翻译它
+    const translatedMessage = window.t ? window.t(message) : message;
+    messageEl.textContent = translatedMessage === message ? message : translatedMessage;
     toast.className = `toast ${type}`;
     toast.classList.remove('hidden');
 
@@ -2543,10 +2551,92 @@ window.showDetail = showInspirationDetail;
 window.showReplyForm = showReplyForm;
 window.deleteComment = deleteComment;
 
+// 语言切换功能
+function toggleLanguageMenu() {
+    const menu = document.getElementById('langMenu');
+    menu.classList.toggle('hidden');
+}
+
+function changeLanguage(lang) {
+    if (window.i18n) {
+        window.i18n.setLanguage(lang);
+        updateLanguageDisplay();
+        document.getElementById('langMenu').classList.add('hidden');
+    }
+}
+
+function updateLanguageDisplay() {
+    const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'zh';
+
+    // 更新首页的语言显示
+    const display = document.getElementById('currentLangDisplay');
+    if (display) {
+        display.textContent = currentLang === 'zh' ? '中文' : 'EN';
+    }
+
+    // 更新登录页面的语言显示
+    const loginDisplay = document.getElementById('loginCurrentLangDisplay');
+    if (loginDisplay) {
+        loginDisplay.textContent = currentLang === 'zh' ? '中文' : 'EN';
+    }
+
+    // 更新语言选项的激活状态
+    document.querySelectorAll('.lang-option').forEach(option => {
+        option.classList.remove('active');
+        if (option.onclick.toString().includes(`'${currentLang}'`)) {
+            option.classList.add('active');
+        }
+    });
+}
+
+function changeLanguageInLogin(lang) {
+    if (window.i18n) {
+        window.i18n.setLanguage(lang);
+        updateLanguageDisplay();
+        document.getElementById('loginLangMenu').classList.add('hidden');
+    }
+}
+
+// 点击页面其他地方关闭语言菜单
+document.addEventListener('click', (e) => {
+    const langSwitcher = document.querySelector('.language-switcher');
+    const langMenu = document.getElementById('langMenu');
+
+    if (langSwitcher && !langSwitcher.contains(e.target)) {
+        if (langMenu) {
+            langMenu.classList.add('hidden');
+        }
+    }
+});
+
+// 监听语言变化事件，更新动态内容
+window.addEventListener('languageChanged', (event) => {
+    const newLang = event.detail.language;
+
+    // 更新动态生成的内容
+    if (typeof renderInspirations === 'function') {
+        renderInspirations();
+    }
+    if (typeof renderGroups === 'function') {
+        renderGroups();
+    }
+    if (typeof renderNotifications === 'function') {
+        renderNotifications();
+    }
+
+    // 重新初始化图标
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+});
+
 // Homepage global functions
 window.showLogin = showLogin;
 window.showRegister = showRegister;
 window.scrollToFeatures = scrollToFeatures;
+window.toggleLanguageMenu = toggleLanguageMenu;
+window.changeLanguage = changeLanguage;
+window.changeLanguageInLogin = changeLanguageInLogin;
 
 // Notifications global functions
 window.markNotificationAsRead = markNotificationAsRead;

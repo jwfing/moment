@@ -143,6 +143,73 @@ body {
     align-items: center;
 }
 
+/* 语言切换器样式 */
+.language-switcher {
+    position: relative;
+}
+
+.lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.lang-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.lang-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.lang-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+    min-width: 150px;
+}
+
+.lang-menu.hidden {
+    display: none;
+}
+
+.lang-option {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.lang-option:hover {
+    background: #f5f5f5;
+}
+
+.lang-option.active {
+    background: #667eea;
+    color: white;
+}
+
 .homepage-main {
     padding: 0;
 }
@@ -487,7 +554,19 @@ body {
     padding: 20px;
 }
 
+.login-header {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.login-lang-switcher .lang-btn:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+}
+
 .login-container {
+    position: relative;
     background: white;
     border-radius: 20px;
     padding: 40px;
