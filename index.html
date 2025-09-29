@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moment - 灵感记录</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录页面 -->
+        <div id="loginPage" class="page">
+            <div class="login-container">
+                <div class="logo">
+                    <h1><i data-lucide="lightbulb"></i> Moment</h1>
+                    <p>记录你的灵感瞬间</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">登录</button>
+                    <button class="tab-btn" data-tab="register">注册</button>
+                </div>
+
+                <div class="auth-form">
+                    <form id="loginForm" class="form-content active">
+                        <div class="form-group">
+                            <input type="email" id="loginEmail" placeholder="邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="loginPassword" placeholder="密码" required>
+                        </div>
+                        <button type="submit" class="btn-primary">登录</button>
+                    </form>
+
+                    <form id="registerForm" class="form-content">
+                        <div class="form-group">
+                            <input type="email" id="registerEmail" placeholder="邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="registerPassword" placeholder="密码" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="registerNickname" placeholder="昵称" required>
+                        </div>
+                        <button type="submit" class="btn-primary">注册</button>
+                    </form>
+                </div>
+
+                <div class="oauth-section">
+                    <div class="divider">
+                        <span>或</span>
+                    </div>
+                    <button id="googleLogin" class="btn-oauth google">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        使用 Google 登录
+                    </button>
+                    <button id="githubLogin" class="btn-oauth github">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        使用 GitHub 登录
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主页面 -->
+        <div id="mainPage" class="page hidden">
+            <!-- 头部导航 -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo-small">
+                        <h2><i data-lucide="lightbulb"></i> Moment</h2>
+                    </div>
+                    <div class="header-actions">
+                        <button id="addInspirationBtn" class="btn-primary">
+                            <i data-lucide="plus"></i> 记录灵感
+                        </button>
+                        <button id="inboxBtn" class="btn-icon inbox-btn">
+                            <i data-lucide="bell"></i>
+                            <span id="unreadNotificationCount" class="notification-badge hidden">0</span>
+                        </button>
+                        <div class="user-menu">
+                            <button id="userMenuBtn" class="user-avatar">
+                                <img id="userAvatarImg" src="" alt="用户头像">
+                                <span id="userNickname"></span>
+                            </button>
+                            <div id="userDropdown" class="dropdown-menu hidden">
+                                <a href="#" id="profileBtn">个人资料</a>
+                                <a href="#" id="logoutBtn">退出登录</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 主内容区 -->
+            <main class="main-content">
+                <!-- 导航标签页 -->
+                <div class="content-nav">
+                    <button class="nav-tab active" data-tab="personal">我的灵感</button>
+                    <button class="nav-tab" data-tab="groups">小组</button>
+                    <button class="nav-tab" data-tab="following">关注</button>
+                    <button class="nav-tab" data-tab="discover">发现</button>
+                    <button class="nav-tab" data-tab="notifications">通知</button>
+                </div>
+
+                <!-- 个人灵感页面 -->
+                <div id="personalTab" class="tab-content active">
+                    <!-- 搜索和筛选 -->
+                    <div class="search-section">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="搜索灵感...">
+                        <button id="searchBtn">🔍</button>
+                    </div>
+                    <div class="filters">
+                        <select id="categoryFilter">
+                            <option value="">所有分类</option>
+                            <option value="idea">想法</option>
+                            <option value="quote">引言</option>
+                            <option value="thought">思考</option>
+                            <option value="solution">解决方案</option>
+                        </select>
+                        <select id="moodFilter">
+                            <option value="">所有心情</option>
+                            <option value="excited">兴奋</option>
+                            <option value="calm">平静</option>
+                            <option value="frustrated">沮丧</option>
+                            <option value="hopeful">充满希望</option>
+                        </select>
+                        <button id="favoritesOnlyBtn" class="filter-btn">只看收藏</button>
+                    </div>
+                </div>
+
+                <!-- 灵感列表 -->
+                <div class="inspirations-grid" id="inspirationsList">
+                    <!-- 灵感卡片将在此处动态添加 -->
+                </div>
+
+                <!-- 加载状态 -->
+                <div id="loadingSpinner" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>加载中...</p>
+                </div>
+
+                <!-- 空状态 -->
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon">💭</div>
+                    <h3>还没有记录任何灵感</h3>
+                    <p>点击"记录灵感"按钮开始记录你的第一个想法吧！</p>
+                    <button class="btn-primary" onclick="showInspirationModal()">记录第一个灵感</button>
+                </div>
+                </div>
+
+                <!-- 小组页面 -->
+                <div id="groupsTab" class="tab-content hidden">
+                    <div class="groups-header">
+                        <h3>我的小组</h3>
+                        <button id="createGroupBtn" class="btn-primary"><i data-lucide="users"></i> 创建小组</button>
+                    </div>
+
+                    <div class="groups-grid" id="myGroupsList">
+                        <!-- 小组卡片将在此处动态添加 -->
+                    </div>
+
+                    <div class="groups-header">
+                        <h3>发现小组</h3>
+                    </div>
+
+                    <div class="groups-grid" id="discoverGroupsList">
+                        <!-- 发现的小组卡片将在此处动态添加 -->
+                    </div>
+                </div>
+
+                <!-- 关注页面 -->
+                <div id="followingTab" class="tab-content hidden">
+                    <div class="following-header">
+                        <h3>我关注的人</h3>
+                    </div>
+
+                    <div class="following-grid" id="followingList">
+                        <!-- 关注的用户将在此处动态添加 -->
+                    </div>
+
+                    <div class="following-header">
+                        <h3>关注我的人</h3>
+                    </div>
+
+                    <div class="following-grid" id="followersList">
+                        <!-- 粉丝列表将在此处动态添加 -->
+                    </div>
+
+                    <div class="following-header">
+                        <h3>小组动态</h3>
+                    </div>
+
+                    <div class="inspirations-grid" id="groupInspirationsList">
+                        <!-- 小组分享的灵感将在此处动态添加 -->
+                    </div>
+                </div>
+
+                <!-- 发现页面 -->
+                <div id="discoverTab" class="tab-content hidden">
+                    <div class="discover-header">
+                        <h3>发现用户</h3>
+                        <div class="search-bar">
+                            <input type="text" id="userSearchInput" placeholder="搜索用户...">
+                            <button id="userSearchBtn">🔍</button>
+                        </div>
+                    </div>
+
+                    <div class="users-grid" id="discoverUsersList">
+                        <!-- 发现的用户将在此处动态添加 -->
+                    </div>
+                </div>
+
+                <!-- 通知页面 -->
+                <div id="notificationsTab" class="tab-content hidden">
+                    <div class="notifications-header">
+                        <h3>我的通知</h3>
+                        <div class="notification-actions">
+                            <button id="markAllReadBtn" class="btn-secondary">
+                                <i data-lucide="check-check"></i> 全部已读
+                            </button>
+                            <button id="clearAllNotificationsBtn" class="btn-secondary">
+                                <i data-lucide="trash-2"></i> 清空通知
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 通知筛选 -->
+                    <div class="notification-filters">
+                        <button class="filter-btn active" data-filter="all">全部</button>
+                        <button class="filter-btn" data-filter="unread">未读</button>
+                        <button class="filter-btn" data-filter="like">点赞</button>
+                        <button class="filter-btn" data-filter="comment">评论</button>
+                        <button class="filter-btn" data-filter="reply">回复</button>
+                    </div>
+
+                    <!-- 通知列表 -->
+                    <div class="notifications-list" id="notificationsList">
+                        <!-- 通知将在此处动态添加 -->
+                    </div>
+
+                    <!-- 通知加载状态 -->
+                    <div id="notificationsLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>加载通知中...</p>
+                    </div>
+
+                    <!-- 通知空状态 -->
+                    <div id="notificationsEmpty" class="empty-state hidden">
+                        <div class="empty-icon">
+                            <i data-lucide="bell"></i>
+                        </div>
+                        <h3>暂无通知</h3>
+                        <p>当有人点赞或评论你的灵感时，通知会出现在这里</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 灵感编辑模态框 -->
+        <div id="inspirationModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">记录灵感</h3>
+                    <button class="modal-close" onclick="hideInspirationModal()">&times;</button>
+                </div>
+                <form id="inspirationForm" class="modal-body">
+                    <div class="form-group">
+                        <label for="inspirationTitle">标题</label>
+                        <input type="text" id="inspirationTitle" placeholder="给你的灵感起个标题..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inspirationContent">内容</label>
+                        <textarea id="inspirationContent" placeholder="在这里记录你的灵感..." rows="6" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="inspirationCategory">分类</label>
+                            <select id="inspirationCategory">
+                                <option value="idea">想法</option>
+                                <option value="quote">引言</option>
+                                <option value="thought">思考</option>
+                                <option value="solution">解决方案</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inspirationMood">心情</label>
+                            <select id="inspirationMood">
+                                <option value="excited">兴奋</option>
+                                <option value="calm">平静</option>
+                                <option value="frustrated">沮丧</option>
+                                <option value="hopeful">充满希望</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inspirationTags">标签</label>
+                        <input type="text" id="inspirationTags" placeholder="用逗号分隔多个标签...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isPrivate">
+                            设为私有
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inspirationImage">图片</label>
+                        <input type="file" id="inspirationImage" accept="image/*">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="hideInspirationModal()">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 灵感详情模态框 -->
+        <div id="inspirationDetailModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="detailTitle"></h3>
+                    <div class="detail-actions">
+                        <button id="favoriteBtn" class="btn-icon"><i data-lucide="star"></i></button>
+                        <button id="shareToGroupBtn" class="btn-icon"><i data-lucide="send"></i></button>
+                        <button id="editBtn" class="btn-icon"><i data-lucide="edit"></i></button>
+                        <button id="deleteBtn" class="btn-icon"><i data-lucide="trash-2"></i></button>
+                        <button class="modal-close" onclick="hideDetailModal()">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div id="detailContent" class="detail-content"></div>
+                    <div id="detailMeta" class="detail-meta"></div>
+                    <div id="detailTags" class="detail-tags"></div>
+                    <div id="detailImage" class="detail-image"></div>
+
+                    <!-- 点赞和评论统计 -->
+                    <div class="engagement-stats">
+                        <div class="stat-item">
+                            <button id="likeBtn" class="engagement-btn">
+                                <i data-lucide="heart" class="like-icon"></i>
+                                <span id="likeCount">0</span>
+                            </button>
+                        </div>
+                        <div class="stat-item">
+                            <i data-lucide="message-circle"></i>
+                            <span id="commentCount">0</span> 评论
+                        </div>
+                    </div>
+
+                    <!-- 评论区域 -->
+                    <div class="comments-section">
+                        <h4>评论</h4>
+
+                        <!-- 添加评论表单 -->
+                        <form id="addCommentForm" class="add-comment-form">
+                            <div class="comment-input-group">
+                                <textarea id="commentInput" placeholder="添加评论..." rows="2"></textarea>
+                                <button type="submit" class="btn-primary btn-sm">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- 评论列表 -->
+                        <div id="commentsList" class="comments-list">
+                            <!-- 评论将在此处动态添加 -->
+                        </div>
+
+                        <!-- 评论加载状态 -->
+                        <div id="commentsLoading" class="loading-small hidden">
+                            <div class="spinner-small"></div>
+                            <span>加载评论中...</span>
+                        </div>
+
+                        <!-- 评论空状态 -->
+                        <div id="commentsEmpty" class="empty-comments hidden">
+                            <i data-lucide="message-circle"></i>
+                            <p>还没有评论，来发表第一个评论吧！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 创建小组模态框 -->
+        <div id="createGroupModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>创建小组</h3>
+                    <button class="modal-close" onclick="hideCreateGroupModal()">&times;</button>
+                </div>
+                <form id="createGroupForm" class="modal-body">
+                    <div class="form-group">
+                        <label for="groupName">小组名称</label>
+                        <input type="text" id="groupName" placeholder="给小组起个名字..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="groupDescription">小组描述</label>
+                        <textarea id="groupDescription" placeholder="描述一下这个小组的主题..." rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isPrivateGroup">
+                            私有小组（仅邀请加入）
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxMembers">最大成员数</label>
+                        <input type="number" id="maxMembers" value="50" min="2" max="500">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="hideCreateGroupModal()">取消</button>
+                        <button type="submit" class="btn-primary">创建小组</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 分享到小组模态框 -->
+        <div id="shareToGroupModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>分享到小组</h3>
+                    <button class="modal-close" onclick="hideShareToGroupModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>选择要分享到的小组：</label>
+                        <div id="groupSelectionList" class="group-selection-list">
+                            <!-- 小组选择列表将在此处动态添加 -->
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="hideShareToGroupModal()">取消</button>
+                        <button id="confirmShareBtn" class="btn-primary">分享</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户详情模态框 -->
+        <div id="userDetailModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="user-info">
+                        <img id="userDetailAvatar" class="user-avatar-large" src="" alt="用户头像">
+                        <div>
+                            <h3 id="userDetailNickname"></h3>
+                            <p id="userDetailBio"></p>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button id="followUserBtn" class="btn-primary">关注</button>
+                        <button class="modal-close" onclick="hideUserDetailModal()">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="user-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="userInspirationCount">0</span>
+                            <span class="stat-label">灵感</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="userFollowingCount">0</span>
+                            <span class="stat-label">关注</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="userFollowerCount">0</span>
+                            <span class="stat-label">粉丝</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 小组详情模态框 -->
+        <div id="groupDetailModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="group-info">
+                        <img id="groupDetailAvatar" class="group-avatar-large" src="" alt="小组头像">
+                        <div>
+                            <h3 id="groupDetailName"></h3>
+                            <p id="groupDetailDescription"></p>
+                        </div>
+                    </div>
+                    <div class="group-actions">
+                        <button id="joinGroupBtn" class="btn-primary">加入小组</button>
+                        <button id="leaveGroupBtn" class="btn-secondary hidden">退出小组</button>
+                        <button class="modal-close" onclick="hideGroupDetailModal()">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="group-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="groupMemberCount">0</span>
+                            <span class="stat-label">成员</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="groupInspirationCount">0</span>
+                            <span class="stat-label">分享</span>
+                        </div>
+                    </div>
+
+                    <div class="group-content">
+                        <h4>最近分享</h4>
+                        <div id="groupRecentInspirations" class="group-inspirations">
+                            <!-- 小组最近分享的灵感将在此处显示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 申请加入小组模态框 -->
+        <div id="applyGroupModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>申请加入小组</h3>
+                    <button class="modal-close" onclick="hideApplyGroupModal()">&times;</button>
+                </div>
+                <form id="applyGroupForm" class="modal-body">
+                    <div class="group-info-display">
+                        <img id="applyGroupAvatar" class="group-avatar-medium" src="" alt="小组头像">
+                        <div>
+                            <h4 id="applyGroupName"></h4>
+                            <p id="applyGroupDescription"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="applicationMessage">申请理由</label>
+                        <textarea id="applicationMessage" placeholder="请简单介绍一下自己，说明为什么想加入这个小组..." rows="4" required></textarea>
+                    </div>
+
+                    <div class="voting-info">
+                        <div class="info-card">
+                            <i data-lucide="users"></i>
+                            <div>
+                                <h5>投票机制</h5>
+                                <p id="votingRequirement"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="hideApplyGroupModal()">取消</button>
+                        <button type="submit" class="btn-primary">提交申请</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 投票通知模态框 -->
+        <div id="voteNotificationModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>小组申请投票</h3>
+                    <button class="modal-close" onclick="hideVoteNotificationModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="application-info">
+                        <div class="applicant-info">
+                            <img id="applicantAvatar" class="user-avatar" src="" alt="申请者头像">
+                            <div>
+                                <h4 id="applicantName"></h4>
+                                <p class="application-date">申请时间: <span id="applicationDate"></span></p>
+                            </div>
+                        </div>
+
+                        <div class="application-message">
+                            <h5>申请理由:</h5>
+                            <p id="voteApplicationMessage"></p>
+                        </div>
+
+                        <div class="voting-status">
+                            <div class="vote-progress">
+                                <div class="progress-bar">
+                                    <div id="voteProgressBar" class="progress-fill"></div>
+                                </div>
+                                <p id="voteStatusText">投票进度: 0/0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vote-actions">
+                        <button id="approveVoteBtn" class="btn-success">
+                            <i data-lucide="check"></i> 同意加入
+                        </button>
+                        <button id="rejectVoteBtn" class="btn-danger">
+                            <i data-lucide="x"></i> 拒绝申请
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
+            <button onclick="hideToast()">&times;</button>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
