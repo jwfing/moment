@@ -36,10 +36,86 @@ const inspirationModal = document.getElementById('inspirationModal');
 const inspirationDetailModal = document.getElementById('inspirationDetailModal');
 const inspirationForm = document.getElementById('inspirationForm');
 
+// 首页功能
+function showHomepage() {
+    document.getElementById('homePage').classList.remove('hidden');
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('mainApp').classList.add('hidden');
+}
+
+function showLogin() {
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('mainApp').classList.add('hidden');
+
+    // 设置为登录标签页
+    const loginTab = document.querySelector('[data-tab="login"]');
+    if (loginTab) loginTab.click();
+}
+
+function showRegister() {
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('mainApp').classList.add('hidden');
+
+    // 设置为注册标签页
+    const registerTab = document.querySelector('[data-tab="register"]');
+    if (registerTab) registerTab.click();
+}
+
+function scrollToFeatures() {
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+        featuresSection.scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+}
+
+function showMainApp() {
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+}
+
+// 检查用户登录状态并显示相应页面
+async function checkAuthStatus() {
+    try {
+        const { data: session } = await client.auth.getCurrentSession();
+
+        if (session?.session?.accessToken) {
+            // 用户已登录，获取用户信息并显示主应用
+            const { data: userData } = await client.auth.getCurrentUser();
+            if (userData?.user) {
+                currentUser = userData;
+                showMainApp();
+                await loadInspirations();
+                return true;
+            }
+        }
+
+        // 用户未登录，显示首页
+        showHomepage();
+        return false;
+    } catch (error) {
+        console.error('检查登录状态失败:', error);
+        showHomepage();
+        return false;
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    lucide.createIcons();
     setupEventListeners();
-    await checkAuthState();
+
+    // 先检查登录状态，根据状态决定显示哪个页面
+    const isLoggedIn = await checkAuthStatus();
+
+    if (!isLoggedIn) {
+        // 用户未登录，重新初始化图标（为首页）
+        lucide.createIcons();
+    }
 });
 
 // Setup event listeners
@@ -130,7 +206,7 @@ async function handleLogin(e) {
 
         currentUser = data;
         showToast('登录成功！', 'success');
-        showMainPage();
+        showMainApp();
         await loadInspirations();
     } catch (error) {
         console.error('Login error:', error);
@@ -168,7 +244,7 @@ async function handleRegister(e) {
 
         currentUser = authData;
         showToast('注册成功！', 'success');
-        showMainPage();
+        showMainApp();
         await loadInspirations();
     } catch (error) {
         console.error('Register error:', error);
@@ -2182,12 +2258,10 @@ async function sendApprovalNotification(application) {
 }
 
 function showVoteApplicationModal(application) {
-    console.log('showVoteApplicationModal called with:', application);
     currentVotingApplication = application;
 
     // 填充申请信息到投票模态框
     const modal = document.getElementById('voteNotificationModal');
-    console.log('Modal element found:', modal);
     const applicantName = document.getElementById('applicantName');
     const applicantAvatar = document.getElementById('applicantAvatar');
     const applicationMessage = document.getElementById('voteApplicationMessage');
@@ -2469,6 +2543,11 @@ window.showDetail = showInspirationDetail;
 window.showReplyForm = showReplyForm;
 window.deleteComment = deleteComment;
 
+// Homepage global functions
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.scrollToFeatures = scrollToFeatures;
+
 // Notifications global functions
 window.markNotificationAsRead = markNotificationAsRead;
 window.deleteNotification = deleteNotification;
@@ -2610,13 +2689,8 @@ function getNotificationTypeText(type) {
 }
 
 async function handleNotificationClick(notificationId) {
-    console.log('handleNotificationClick called with ID:', notificationId);
     const notification = notifications.find(n => n.id === notificationId);
-    console.log('Found notification:', notification);
-    if (!notification) {
-        console.log('No notification found');
-        return;
-    }
+    if (!notification) return;
 
     // 标记为已读
     if (!notification.is_read) {
@@ -2625,16 +2699,13 @@ async function handleNotificationClick(notificationId) {
 
     // 根据通知类型处理点击事件
     if (notification.type === 'group_application') {
-        console.log('Processing group application notification');
         // 处理小组申请通知 - 显示投票界面
         try {
             // 从通知消息中提取小组名称
             const groupNameMatch = notification.message.match(/"([^"]+)"/);
             const groupName = groupNameMatch ? groupNameMatch[1] : null;
-            console.log('Extracted group name:', groupName);
 
             if (groupName) {
-                console.log('Querying for applications...');
                 // 查找该小组的待处理申请
                 const { data: applications, error } = await client.database
                     .from('group_applications')
@@ -2647,8 +2718,6 @@ async function handleNotificationClick(notificationId) {
                     .eq('status', 'pending')
                     .eq('applicant_id', notification.sender_id);
 
-                console.log('Query result:', { applications, error });
-
                 if (error) {
                     console.error('Error fetching application:', error);
                     showToast('获取申请信息失败', 'error');
@@ -2656,14 +2725,11 @@ async function handleNotificationClick(notificationId) {
                 }
 
                 if (applications && applications.length > 0) {
-                    console.log('Showing vote modal for application:', applications[0]);
                     showVoteApplicationModal(applications[0]);
                 } else {
-                    console.log('No applications found');
                     showToast('申请不存在或已处理', 'info');
                 }
             } else {
-                console.log('Could not extract group name');
                 showToast('无法解析申请信息', 'error');
             }
         } catch (error) {
