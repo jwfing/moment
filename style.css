@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* 全局样式 */
 * {
     margin: 0;
@@ -5,13 +7,43 @@
     box-sizing: border-box;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+    /* 主色系 */
+    --primary-color: #2B313F;
+    --primary-light: #3A4251;
+    --primary-dark: #1F242E;
+
+    /* 背景色系 */
+    --background-main: #E2E7BF;
+    --background-light: #EDF1CC;
+    --background-dark: #D5DB9F;
+
+    /* 辅助色 */
+    --accent-orange: #F4A261;
+    --accent-green: #7FB069;
+    --accent-warm: #E76F51;
+
+    /* 中性色 */
+    --text-primary: #2B313F;
+    --text-secondary: #5A6372;
+    --text-light: #8B9299;
+    --white: #FFFFFF;
+    --gray-100: #F8F9FA;
+    --gray-200: #E9ECEF;
+    --gray-300: #DEE2E6;
+
+    /* 状态色 */
+    --success: #7FB069;
+    --warning: #F4A261;
+    --error: #E76F51;
+    --info: #2B313F;
+}
 
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--background-main);
     min-height: 100vh;
-    color: #333;
+    color: var(--text-primary);
 }
 
 /* Logo 和品牌样式 */
@@ -22,7 +54,7 @@ body {
     font-family: 'Comfortaa', cursive;
     font-weight: 500;
     font-size: 1.5rem;
-    color: white;
+    color: var(--primary-color);
 }
 
 .logo-icon {
@@ -38,7 +70,7 @@ body {
     position: absolute;
     width: 4px;
     height: 4px;
-    background: #fbbf24;
+    background: var(--accent-orange);
     border-radius: 50%;
     animation: sparkle 3s ease-in-out infinite;
 }
@@ -83,9 +115,9 @@ body {
 .logo-circle {
     width: 28px;
     height: 28px;
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--primary-color);
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.1));
+    background: linear-gradient(135deg, rgba(244, 162, 97, 0.2), rgba(244, 162, 97, 0.1));
     animation: pulse 4s ease-in-out infinite;
 }
 
@@ -110,9 +142,9 @@ body {
 
 /* 首页样式 */
 .homepage {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--background-main) 0%, var(--background-light) 100%);
     min-height: 100vh;
-    color: white;
+    color: var(--text-primary);
 }
 
 .homepage-nav {
@@ -120,11 +152,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
     z-index: 100;
+    border-bottom: 1px solid var(--background-dark);
 }
 
 .nav-brand h1 {
@@ -133,7 +166,7 @@ body {
     gap: 0.5rem;
     font-size: 1.8rem;
     font-weight: 400;
-    color: white;
+    color: var(--primary-color);
     margin: 0;
 }
 
@@ -153,17 +186,19 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    color: var(--text-primary);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .lang-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--gray-100);
+    border-color: var(--primary-color);
 }
 
 .lang-btn i {
@@ -206,7 +241,7 @@ body {
 }
 
 .lang-option.active {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
 }
 
@@ -234,7 +269,7 @@ body {
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 1.5rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -243,7 +278,7 @@ body {
 .hero-subtitle {
     font-size: 1.2rem;
     line-height: 1.6;
-    opacity: 0.9;
+    color: var(--text-secondary);
     margin-bottom: 2rem;
 }
 
@@ -268,13 +303,12 @@ body {
 
 .inspiration-card {
     position: absolute;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--white);
+    border: 1px solid var(--background-dark);
     border-radius: 16px;
     padding: 1.5rem;
     width: 200px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(43, 49, 63, 0.1);
     transition: transform 0.3s ease;
 }
 
@@ -321,18 +355,18 @@ body {
     width: 2rem;
     height: 2rem;
     margin-bottom: 1rem;
-    color: #ffffff;
+    color: var(--accent-orange);
 }
 
 .card-text {
     font-size: 0.9rem;
     line-height: 1.4;
-    opacity: 0.9;
+    color: var(--text-secondary);
 }
 
 .features {
     padding: 6rem 2rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
 }
 
@@ -352,30 +386,32 @@ body {
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--white);
+    border: 1px solid var(--gray-300);
     border-radius: 20px;
     padding: 2rem;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(43, 49, 63, 0.1);
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px rgba(43, 49, 63, 0.15);
+    border-color: var(--accent-orange);
 }
 
 .feature-icon {
     width: 4rem;
     height: 4rem;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-warm) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
     color: white;
+    box-shadow: 0 4px 12px rgba(244, 162, 97, 0.3);
 }
 
 .feature-card h3 {
@@ -387,7 +423,7 @@ body {
 .feature-card p {
     font-size: 1rem;
     line-height: 1.6;
-    opacity: 0.9;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
 }
 
@@ -583,7 +619,7 @@ body {
 .logo h1 {
     font-size: 2.5rem;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -649,7 +685,7 @@ body {
 .btn-primary {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 10px;
@@ -728,8 +764,10 @@ body {
 
 /* 头部导航 */
 .header {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    border-bottom: 1px solid var(--background-dark) !important;
+    box-shadow: none !important;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -738,45 +776,52 @@ body {
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 15px 20px;
+    padding: 0.8rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 99px;
+    box-sizing: border-box;
 }
 
 .logo-small h2 {
-    font-size: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--primary-color);
+    margin: 0;
+    background: none;
 }
 
 /* 主应用页面的 Logo 样式调整 */
 .logo-small .brand-logo {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #667eea;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--primary-color);
     background: none;
-    -webkit-text-fill-color: #667eea;
 }
 
 .logo-small .logo-icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
 }
 
 .logo-small .logo-circle {
-    width: 20px;
-    height: 20px;
-    border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    width: 24px;
+    height: 24px;
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(43, 49, 63, 0.1), rgba(127, 176, 105, 0.1));
 }
 
 .logo-small .logo-spark {
-    width: 3px;
-    height: 3px;
-    background: #a78bfa;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-warm);
 }
 
 .header-actions {
@@ -802,16 +847,15 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 15px;
-    background: #f8f9fa;
+    padding: 4px;
+    background: none;
     border: none;
-    border-radius: 25px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: opacity 0.3s;
 }
 
 .user-avatar:hover {
-    background: #e9ecef;
+    opacity: 0.8;
 }
 
 .user-avatar img {
@@ -877,12 +921,18 @@ body {
 
 .search-bar button {
     padding: 15px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     font-size: 18px;
+    transition: all 0.3s;
+}
+
+.search-bar button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 49, 63, 0.3);
 }
 
 .filters {
@@ -909,9 +959,9 @@ body {
 }
 
 .filter-btn.active {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    border-color: #667eea;
+    border-color: var(--primary-color);
 }
 
 /* 灵感网格 */
@@ -1015,16 +1065,16 @@ body {
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background: rgba(103, 126, 234, 0.1);
-    border: 1px solid rgba(103, 126, 234, 0.2);
+    background: rgba(43, 49, 63, 0.1);
+    border: 1px solid rgba(43, 49, 63, 0.2);
     border-radius: 0.25rem;
     color: #333;
     font-size: 0.8rem;
 }
 
 .weather-info {
-    background: rgba(34, 197, 94, 0.1);
-    border-color: rgba(34, 197, 94, 0.2);
+    background: rgba(127, 176, 105, 0.1);
+    border-color: rgba(127, 176, 105, 0.2);
 }
 
 .card-actions {
@@ -1081,7 +1131,7 @@ body {
     width: 24px;
     height: 24px;
     margin-right: 8px;
-    color: #667eea;
+    color: var(--primary-color);
 }
 
 /* 位置和天气信息中的图标样式 */
@@ -1180,7 +1230,7 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--primary-color);
 }
 
 .form-group textarea {
@@ -1197,17 +1247,72 @@ body {
 
 .btn-secondary {
     padding: 12px 24px;
-    background: #f8f9fa;
-    color: #666;
-    border: none;
+    background: rgba(43, 49, 63, 0.1);
+    color: var(--primary-color);
+    border: 2px solid rgba(43, 49, 63, 0.2);
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.3s;
+    transition: all 0.3s;
 }
 
 .btn-secondary:hover {
-    background: #e9ecef;
+    background: rgba(43, 49, 63, 0.2);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(43, 49, 63, 0.2);
+}
+
+/* 大按钮样式 */
+.btn-primary.large {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 30px;
+    background: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    height: 58px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.btn-primary.large:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(43, 49, 63, 0.4);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-warm) 100%);
+}
+
+.btn-secondary.large {
+    padding: 16px 36px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    height: 58px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.btn-secondary.large:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(43, 49, 63, 0.3);
 }
 
 /* 详情模态框 */
@@ -1242,7 +1347,7 @@ body {
 
 .detail-tag {
     padding: 6px 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -1264,7 +1369,7 @@ body {
     width: 40px;
     height: 40px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
+    border-top: 4px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 20px;
@@ -1343,8 +1448,10 @@ body {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .header-content {
+        padding: 0.8rem 1rem;
         flex-direction: column;
         gap: 15px;
+        height: auto;
     }
 
     .header-actions {
@@ -1409,9 +1516,9 @@ body {
 }
 
 .nav-tab.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(43, 49, 63, 0.3);
 }
 
 .nav-tab:hover:not(.active) {
@@ -1453,6 +1560,13 @@ body {
     color: #333;
 }
 
+/* 创建小组按钮样式 */
+#createGroupBtn {
+    flex-shrink: 0;
+    width: auto;
+    white-space: nowrap;
+}
+
 /* 小组卡片 */
 .group-card {
     background: white;
@@ -1472,7 +1586,6 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .group-card:hover {
@@ -1486,11 +1599,11 @@ body {
     border-radius: 15px;
     object-fit: cover;
     margin-bottom: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(244, 162, 97, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--accent-orange);
     font-size: 1.5rem;
     font-weight: bold;
 }
@@ -1522,8 +1635,8 @@ body {
 }
 
 .group-private {
-    background: #f8f9fa;
-    color: #667eea;
+    background: rgba(43, 49, 63, 0.1);
+    color: var(--primary-color);
     padding: 2px 8px;
     border-radius: 10px;
     font-size: 0.7rem;
@@ -1595,7 +1708,7 @@ body {
 }
 
 .follow-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 8px 20px;
@@ -1608,7 +1721,7 @@ body {
 
 .follow-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(43, 49, 63, 0.3);
 }
 
 .follow-btn.following {
@@ -1689,7 +1802,7 @@ body {
 }
 
 .group-selection-item.selected {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -1703,7 +1816,7 @@ body {
     border-radius: 8px;
     object-fit: cover;
     margin-right: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1739,10 +1852,10 @@ body {
 }
 
 .group-inspiration-item {
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.6);
     padding: 15px;
     border-radius: 10px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--primary-color);
 }
 
 .group-inspiration-title {
@@ -1914,8 +2027,8 @@ body {
 
 .comment-input-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(43, 49, 63, 0.1);
 }
 
 .btn-sm {
@@ -2019,7 +2132,7 @@ body {
 }
 
 .comment-mention {
-    color: #667eea;
+    color: var(--primary-color);
     font-weight: 600;
     text-decoration: none;
 }
@@ -2043,7 +2156,7 @@ body {
     width: 16px;
     height: 16px;
     border: 2px solid #f3f3f3;
-    border-top: 2px solid #667eea;
+    border-top: 2px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -2216,9 +2329,9 @@ body {
 }
 
 .filter-btn.active {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    border-color: #667eea;
+    border-color: var(--primary-color);
 }
 
 .notifications-list {
@@ -2243,8 +2356,8 @@ body {
 }
 
 .notification-item.unread {
-    border-left: 4px solid #667eea;
-    background: #fafbff;
+    border-left: 4px solid var(--primary-color);
+    background: rgba(226, 231, 191, 0.3);
 }
 
 .notification-item.unread::before {
@@ -2254,7 +2367,7 @@ body {
     right: 15px;
     width: 8px;
     height: 8px;
-    background: #667eea;
+    background: var(--primary-color);
     border-radius: 50%;
 }
 

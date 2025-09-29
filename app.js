@@ -38,15 +38,23 @@ const inspirationForm = document.getElementById('inspirationForm');
 
 // 首页功能
 function showHomepage() {
-    document.getElementById('homePage').classList.remove('hidden');
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('mainApp').classList.add('hidden');
+    const homePage = document.getElementById('homePage');
+    const loginPage = document.getElementById('loginPage');
+    const mainPage = document.getElementById('mainPage');
+
+    if (homePage) homePage.classList.remove('hidden');
+    if (loginPage) loginPage.classList.add('hidden');
+    if (mainPage) mainPage.classList.add('hidden');
 }
 
 function showLogin() {
-    document.getElementById('homePage').classList.add('hidden');
-    document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('mainApp').classList.add('hidden');
+    const homePage = document.getElementById('homePage');
+    const loginPage = document.getElementById('loginPage');
+    const mainPage = document.getElementById('mainPage');
+
+    if (homePage) homePage.classList.add('hidden');
+    if (loginPage) loginPage.classList.remove('hidden');
+    if (mainPage) mainPage.classList.add('hidden');
 
     // 设置为登录标签页
     const loginTab = document.querySelector('[data-tab="login"]');
@@ -54,9 +62,13 @@ function showLogin() {
 }
 
 function showRegister() {
-    document.getElementById('homePage').classList.add('hidden');
-    document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('mainApp').classList.add('hidden');
+    const homePage = document.getElementById('homePage');
+    const loginPage = document.getElementById('loginPage');
+    const mainPage = document.getElementById('mainPage');
+
+    if (homePage) homePage.classList.add('hidden');
+    if (loginPage) loginPage.classList.remove('hidden');
+    if (mainPage) mainPage.classList.add('hidden');
 
     // 设置为注册标签页
     const registerTab = document.querySelector('[data-tab="register"]');
@@ -73,9 +85,27 @@ function scrollToFeatures() {
 }
 
 function showMainApp() {
-    document.getElementById('homePage').classList.add('hidden');
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('mainApp').classList.remove('hidden');
+    console.log('showMainApp called');
+    const homePage = document.getElementById('homePage');
+    const loginPage = document.getElementById('loginPage');
+    const mainPage = document.getElementById('mainPage');
+
+    if (homePage) homePage.classList.add('hidden');
+    if (loginPage) loginPage.classList.add('hidden');
+    if (mainPage) mainPage.classList.remove('hidden');
+
+    // 更新用户信息
+    updateUserInfo();
+
+    // 初始化社交功能
+    console.log('Initializing social features...');
+    initializeSocialFeatures();
+
+    // 初始化通知系统
+    console.log('Initializing notifications...');
+    if (typeof initializeNotifications === 'function') {
+        initializeNotifications();
+    }
 }
 
 // 检查用户登录状态并显示相应页面
@@ -173,7 +203,7 @@ async function checkAuthState() {
         const { data, error } = await client.auth.getCurrentUser();
         if (data && data.user) {
             currentUser = data;
-            showMainPage();
+            showMainApp();
             await loadInspirations();
         } else {
             showLoginPage();
@@ -301,20 +331,7 @@ function showLoginPage() {
     mainPage.classList.add('hidden');
 }
 
-function showMainPage() {
-    console.log('showMainPage called');
-    loginPage.classList.add('hidden');
-    mainPage.classList.remove('hidden');
-    updateUserInfo();
-
-    // 初始化社交功能
-    console.log('Initializing social features...');
-    initializeSocialFeatures();
-
-    // 初始化通知系统
-    console.log('Initializing notifications...');
-    initializeNotifications();
-}
+// showMainPage function removed - functionality merged into showMainApp
 
 function updateUserInfo() {
     if (currentUser?.profile) {
@@ -1296,14 +1313,19 @@ function switchTab(tabName) {
         targetTab.classList.add('active');
         targetTab.classList.remove('hidden');
         console.log('Target tab content shown for:', tabName);
+
+        currentActiveTab = tabName;
+
+        // 加载对应标签页的数据
+        loadTabData(tabName);
     } else {
         console.error('Could not find tab content with id:', `${tabName}Tab`);
+        console.log('Available tab content elements:');
+        document.querySelectorAll('.tab-content').forEach(el => {
+            console.log('- ', el.id);
+        });
+        return;
     }
-
-    currentActiveTab = tabName;
-
-    // 加载对应标签页的数据
-    loadTabData(tabName);
 }
 
 async function loadTabData(tabName) {
