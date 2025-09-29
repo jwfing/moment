@@ -106,6 +106,9 @@ function showMainApp() {
     if (typeof initializeNotifications === 'function') {
         initializeNotifications();
     }
+
+    // 启动定期清理过期申请
+    startPeriodicCleanup();
 }
 
 // 检查用户登录状态并显示相应页面
@@ -782,49 +785,21 @@ async function toggleLike(inspirationId) {
     }
 
     try {
-        const likeBtn = document.getElementById('likeBtn');
-        const isLiked = likeBtn.classList.contains('liked');
+        // 调用边缘函数处理点赞
+        const { data, error } = await client.functions.invoke('toggle-like', {
+            body: { inspiration_id: inspirationId }
+        });
 
-        if (isLiked) {
-            // Remove like
-            const { error } = await client.database
-                .from('likes')
-                .delete()
-                .eq('inspiration_id', inspirationId)
-                .eq('user_id', currentUser.user.id);
+        if (error) {
+            console.error('Error toggling like:', error);
+            showToast(error.message || '操作失败');
+            return;
+        }
 
-            if (error) {
-                console.error('Error removing like:', error);
-                showToast('取消点赞失败');
-                return;
-            }
-        } else {
-            // Add like
-            const { error } = await client.database
-                .from('likes')
-                .insert([{
-                    inspiration_id: inspirationId,
-                    user_id: currentUser.user.id
-                }]);
-
-            if (error) {
-                console.error('Error adding like:', error);
-                showToast('点赞失败');
-                return;
-            }
-
-            // 发送点赞通知
-            const inspirationOwner = await getInspirationOwner(inspirationId);
-            if (inspirationOwner) {
-                await createNotification(
-                    inspirationOwner.user_id,
-                    currentUser.user.id,
-                    'like',
-                    '有人点赞了你的灵感',
-                    `${currentUser.profile?.nickname || '某位用户'} 点赞了你的灵感 "${inspirationOwner.title}"`,
-                    inspirationId
-                );
-            }
+        if (data.action === 'liked') {
+            showToast('点赞成功');
+        } else if (data.action === 'unliked') {
+            showToast('已取消点赞');
         }
 
         // Refresh likes display
@@ -853,40 +828,18 @@ async function handleCommentSubmit(e, inspirationId) {
     }
 
     try {
-        // Extract @mentions from content
-        const mentionRegex = /@(\w+)/g;
-        const mentions = [];
-        let match;
-        while ((match = mentionRegex.exec(content)) !== null) {
-            mentions.push(match[1]);
-        }
-
-        const { error } = await client.database
-            .from('comments')
-            .insert([{
+        // 调用边缘函数处理评论
+        const { data, error } = await client.functions.invoke('add-comment', {
+            body: {
                 inspiration_id: inspirationId,
-                user_id: currentUser.user.id,
-                content: content,
-                mentioned_users: mentions.length > 0 ? mentions : null
-            }]);
+                content: content
+            }
+        });
 
         if (error) {
             console.error('Error adding comment:', error);
-            showToast('评论失败');
+            showToast(error.message || '评论失败');
             return;
-        }
-
-        // 发送评论通知
-        const inspirationOwner = await getInspirationOwner(inspirationId);
-        if (inspirationOwner) {
-            await createNotification(
-                inspirationOwner.user_id,
-                currentUser.user.id,
-                'comment',
-                '有人评论了你的灵感',
-                `${currentUser.profile?.nickname || '某位用户'} 评论了你的灵感 "${inspirationOwner.title}": ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-                inspirationId
-            );
         }
 
         commentInput.value = '';
@@ -924,66 +877,19 @@ async function handleReplySubmit(e, inspirationId, parentCommentId, replyToUser 
     }
 
     try {
-        // Extract @mentions from content
-        const mentionRegex = /@(\w+)/g;
-        const mentions = [];
-        let match;
-        while ((match = mentionRegex.exec(content)) !== null) {
-            mentions.push(match[1]);
-        }
-
-        const { error } = await client.database
-            .from('comments')
-            .insert([{
+        // 调用边缘函数处理回复评论
+        const { data, error } = await client.functions.invoke('add-comment', {
+            body: {
                 inspiration_id: inspirationId,
-                user_id: currentUser.user.id,
                 content: content,
-                parent_comment_id: parentCommentId,
-                mentioned_users: mentions.length > 0 ? mentions : null
-            }]);
+                parent_comment_id: parentCommentId
+            }
+        });
 
         if (error) {
             console.error('Error adding reply:', error);
-            showToast('回复失败');
+            showToast(error.message || '回复失败');
             return;
-        }
-
-        // 发送回复通知给灵感作者
-        const inspirationOwner = await getInspirationOwner(inspirationId);
-        if (inspirationOwner) {
-            await createNotification(
-                inspirationOwner.user_id,
-                currentUser.user.id,
-                'reply',
-                '有人回复了你的灵感',
-                `${currentUser.profile?.nickname || '某位用户'} 回复了你的灵感 "${inspirationOwner.title}": ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-                inspirationId
-            );
-        }
-
-        // 如果是回复特定用户，也发送通知给被回复的用户
-        if (replyToUser && currentUser.profile?.nickname !== replyToUser) {
-            try {
-                // 根据nickname查找用户
-                const { data: replyToUserData, error: userError } = await client.database
-                    .from('users')
-                    .select('id, nickname')
-                    .eq('nickname', replyToUser)
-                    .single();
-
-                if (!userError && replyToUserData) {
-                    await createNotification(
-                        replyToUserData.id,
-                        currentUser.user.id,
-                        'reply',
-                        '有人回复了你',
-                        `${currentUser.profile?.nickname || '某位用户'} 回复了你的评论: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-                        inspirationId
-                    );
-                }
-            } catch (userLookupError) {
-                console.error('Error looking up reply target user:', userLookupError);
-            }
         }
 
         textarea.value = '';
@@ -1136,52 +1042,7 @@ function getCurrentInspirationId() {
 }
 
 // 通知系统功能
-async function createNotification(recipientId, senderId, type, title, message, inspirationId = null, commentId = null) {
-    try {
-        // 防止自己给自己发通知
-        if (recipientId === senderId) {
-            return;
-        }
 
-        const { error } = await client.database
-            .from('notifications')
-            .insert([{
-                recipient_id: recipientId,
-                sender_id: senderId,
-                type: type,
-                title: title,
-                message: message,
-                related_inspiration_id: inspirationId,
-                related_comment_id: commentId
-            }]);
-
-        if (error) {
-            console.error('Error creating notification:', error);
-        }
-    } catch (error) {
-        console.error('Error creating notification:', error);
-    }
-}
-
-async function getInspirationOwner(inspirationId) {
-    try {
-        const { data, error } = await client.database
-            .from('inspirations')
-            .select('user_id, title, users!inner(nickname)')
-            .eq('id', inspirationId)
-            .single();
-
-        if (error) {
-            console.error('Error getting inspiration owner:', error);
-            return null;
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Error getting inspiration owner:', error);
-        return null;
-    }
-}
 
 function hideDetailModal() {
     document.getElementById('inspirationDetailModal').classList.add('hidden');
@@ -1948,42 +1809,25 @@ async function handleGroupApplication(e) {
     try {
         showLoading(true);
 
-        const groupData = currentApplyingGroup.data;
-        const memberCount = groupData.member_count || 1;
-
-        // 计算需要的票数
-        let votesNeeded;
-        if (memberCount < 40) {
-            votesNeeded = Math.ceil(memberCount / 2);
-        } else {
-            votesNeeded = Math.ceil(memberCount / 3);
-        }
-
-        // 创建申请
-        const { data: application, error: appError } = await client.database
-            .from('group_applications')
-            .insert([{
+        // 调用边缘函数处理申请
+        const { data, error } = await client.functions.invoke('apply-to-group', {
+            body: {
                 group_id: currentApplyingGroup.id,
-                applicant_id: currentUser.user.id,
-                message: message,
-                votes_needed: votesNeeded,
-                votes_received: 0,
-                status: 'pending'
-            }])
-            .select()
-            .single();
+                message: message
+            }
+        });
 
-        if (appError) {
-            console.error('创建申请失败:', appError);
-            showToast('申请提交失败', 'error');
+        if (error) {
+            console.error('申请提交失败:', error);
+            showToast(error.message || '申请提交失败', 'error');
             return;
         }
 
-        // 发送通知给所有小组成员
-        await sendApplicationNotifications(application.id, currentApplyingGroup.id);
-
-        showToast('申请已提交，等待小组成员投票', 'success');
+        showToast(data.message || '申请已提交，等待小组成员投票', 'success');
         hideApplyGroupModal();
+
+        // 清空表单
+        document.getElementById('applicationMessage').value = '';
 
     } catch (error) {
         console.error('申请提交失败:', error);
@@ -1993,44 +1837,6 @@ async function handleGroupApplication(e) {
     }
 }
 
-async function sendApplicationNotifications(applicationId, groupId) {
-    try {
-        // 获取小组所有成员
-        const { data: members, error: membersError } = await client.database
-            .from('group_members')
-            .select('user_id, users(nickname)')
-            .eq('group_id', groupId);
-
-        if (membersError) {
-            console.error('获取小组成员失败:', membersError);
-            return;
-        }
-
-        const applicantName = currentUser.profile?.nickname || currentUser.user.email;
-        const groupName = currentApplyingGroup.data.name;
-
-        // 为每个成员创建通知
-        const notifications = members.map(member => ({
-            recipient_id: member.user_id,
-            sender_id: currentUser.user.id,
-            type: 'group_application',
-            title: '新的小组申请',
-            message: `${applicantName} 申请加入小组 "${groupName}"，请投票决定是否同意`,
-            related_inspiration_id: null,
-            related_comment_id: applicationId // 复用这个字段存储申请ID
-        }));
-
-        const { error: notifyError } = await client.database
-            .from('notifications')
-            .insert(notifications);
-
-        if (notifyError) {
-            console.error('发送通知失败:', notifyError);
-        }
-    } catch (error) {
-        console.error('发送申请通知失败:', error);
-    }
-}
 
 // 投票功能
 let currentVotingApplication = null;
@@ -2135,40 +1941,30 @@ async function submitVote(applicationId, vote) {
     try {
         showLoading(true);
 
-        // 提交投票
-        const { error: voteError } = await client.database
-            .from('group_application_votes')
-            .insert([{
+        // 调用边缘函数处理投票
+        const { data, error } = await client.functions.invoke('submit-vote', {
+            body: {
                 application_id: applicationId,
-                voter_id: currentUser.user.id,
                 vote: vote
-            }]);
+            }
+        });
 
-        if (voteError) {
-            console.error('投票失败:', voteError);
-            showToast('投票失败', 'error');
+        if (error) {
+            console.error('投票失败:', error);
+            showToast(error.message || '投票失败', 'error');
             return;
         }
 
-        // 更新申请的投票计数（只计算赞成票）
-        if (vote) {
-            const { error: updateError } = await client.database
-                .from('group_applications')
-                .update({
-                    votes_received: client.database.raw('votes_received + 1'),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', applicationId);
+        // 显示结果消息
+        showToast(data.message || (vote ? '已投赞成票' : '已投反对票'), 'success');
 
-            if (updateError) {
-                console.error('更新投票计数失败:', updateError);
-            }
+        // 如果申请已通过，显示额外消息
+        if (data.application_approved) {
+            setTimeout(() => {
+                showToast('申请已通过，申请人已自动加入小组！', 'success');
+            }, 1500);
         }
 
-        // 检查是否达到投票要求
-        await checkApplicationStatus(applicationId);
-
-        showToast(vote ? '已投赞成票' : '已投反对票', 'success');
         hideVoteNotificationModal();
 
     } catch (error) {
@@ -2179,113 +1975,6 @@ async function submitVote(applicationId, vote) {
     }
 }
 
-async function checkApplicationStatus(applicationId) {
-    try {
-        // 获取更新后的申请信息
-        const { data: application, error: appError } = await client.database
-            .from('group_applications')
-            .select('*')
-            .eq('id', applicationId)
-            .single();
-
-        if (appError) {
-            console.error('获取申请状态失败:', appError);
-            return;
-        }
-
-        // 检查是否达到通过条件
-        if (application.votes_received >= application.votes_needed) {
-            // 申请通过，自动加入小组
-            await approveGroupApplication(application);
-        }
-    } catch (error) {
-        console.error('检查申请状态失败:', error);
-    }
-}
-
-async function approveGroupApplication(application) {
-    try {
-        // 将用户添加到小组
-        const { error: memberError } = await client.database
-            .from('group_members')
-            .insert([{
-                group_id: application.group_id,
-                user_id: application.applicant_id,
-                role: 'member'
-            }]);
-
-        if (memberError) {
-            console.error('添加小组成员失败:', memberError);
-            return;
-        }
-
-        // 获取当前小组信息并更新成员数
-        const { data: currentGroup, error: getGroupError } = await client.database
-            .from('groups')
-            .select('member_count')
-            .eq('id', application.group_id)
-            .single();
-
-        if (!getGroupError && currentGroup) {
-            const { error: groupError } = await client.database
-                .from('groups')
-                .update({ member_count: currentGroup.member_count + 1 })
-                .eq('id', application.group_id);
-
-            if (groupError) {
-                console.error('更新小组成员数失败:', groupError);
-            }
-        }
-
-        // 更新申请状态
-        const { error: statusError } = await client.database
-            .from('group_applications')
-            .update({ status: 'approved' })
-            .eq('id', application.id);
-
-        // 发送通过通知给申请者
-        await sendApprovalNotification(application);
-
-        console.log('申请已通过，用户已加入小组');
-    } catch (error) {
-        console.error('处理申请通过失败:', error);
-    }
-}
-
-async function sendApprovalNotification(application) {
-    try {
-        // 获取小组信息
-        const { data: group, error: groupError } = await client.database
-            .from('groups')
-            .select('name')
-            .eq('id', application.group_id)
-            .single();
-
-        if (groupError) {
-            console.error('获取小组信息失败:', groupError);
-            return;
-        }
-
-        // 发送通知
-        const { error: notifyError } = await client.database
-            .from('notifications')
-            .insert([{
-                recipient_id: application.applicant_id,
-                sender_id: null, // 系统通知
-                type: 'group_approval',
-                title: '申请通过',
-                message: `恭喜！您的小组申请已通过，现在您是 "${group.name}" 的成员了`,
-                related_inspiration_id: null,
-                related_comment_id: application.id
-            }]);
-
-        if (notifyError) {
-            console.error('发送通过通知失败:', notifyError);
-        }
-    } catch (error) {
-        console.error('发送申请通过通知失败:', error);
-    }
-}
 
 function showVoteApplicationModal(application) {
     currentVotingApplication = application;
@@ -2295,6 +1984,8 @@ function showVoteApplicationModal(application) {
     const applicantName = document.getElementById('applicantName');
     const applicantAvatar = document.getElementById('applicantAvatar');
     const applicationMessage = document.getElementById('voteApplicationMessage');
+    const applicationDate = document.getElementById('applicationDate');
+    const applicationExpiry = document.getElementById('applicationExpiry');
     const voteProgressBar = document.getElementById('voteProgressBar');
     const voteStatusText = document.getElementById('voteStatusText');
     const approveBtn = document.getElementById('approveVoteBtn');
@@ -2305,6 +1996,26 @@ function showVoteApplicationModal(application) {
         applicantAvatar.src = application.users?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${application.users?.nickname || 'user'}`;
     }
     if (applicationMessage) applicationMessage.textContent = application.message || '无申请消息';
+
+    // 显示申请时间
+    if (applicationDate) {
+        applicationDate.textContent = new Date(application.created_at).toLocaleDateString();
+    }
+
+    // 显示过期时间和剩余天数
+    if (applicationExpiry) {
+        const expiryDate = new Date(application.expires_at);
+        const now = new Date();
+        const daysRemaining = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+
+        if (daysRemaining > 0) {
+            applicationExpiry.textContent = `${expiryDate.toLocaleDateString()} (还剩${daysRemaining}天)`;
+            applicationExpiry.style.color = daysRemaining <= 3 ? '#ef4444' : '#6b7280';
+        } else {
+            applicationExpiry.textContent = `${expiryDate.toLocaleDateString()} (已过期)`;
+            applicationExpiry.style.color = '#ef4444';
+        }
+    }
 
     if (voteProgressBar && voteStatusText) {
         const progress = (application.votes_received / application.votes_needed) * 100;
@@ -3030,4 +2741,43 @@ function initializeNotifications() {
     // 添加通知操作按钮事件监听器
     document.getElementById('markAllReadBtn').addEventListener('click', markAllNotificationsAsRead);
     document.getElementById('clearAllNotificationsBtn').addEventListener('click', clearAllNotifications);
+}
+
+// 定期清理过期申请
+function startPeriodicCleanup() {
+    console.log('Starting periodic cleanup for expired applications');
+
+    // 立即执行一次清理
+    cleanupExpiredApplications();
+
+    // 设置定时器，每天执行一次清理（24小时 = 24 * 60 * 60 * 1000 毫秒）
+    setInterval(() => {
+        console.log('Running periodic cleanup of expired applications');
+        cleanupExpiredApplications();
+    }, 24 * 60 * 60 * 1000);
+}
+
+// 调用清理过期申请的边缘函数
+async function cleanupExpiredApplications() {
+    try {
+        const { data, error } = await client.functions.invoke('cleanup-expired-applications');
+
+        if (error) {
+            console.error('Error cleaning up expired applications:', error);
+            return;
+        }
+
+        if (data && data.expired_count > 0) {
+            console.log(`Successfully cleaned up ${data.expired_count} expired applications`);
+            // 如果有过期申请被清理，刷新相关的UI
+            if (typeof loadNotifications === 'function') {
+                loadNotifications(); // 重新加载通知以显示过期通知
+            }
+        } else {
+            console.log('No expired applications found to clean up');
+        }
+
+    } catch (error) {
+        console.error('Failed to cleanup expired applications:', error);
+    }
 }

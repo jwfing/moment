@@ -30,6 +30,19 @@ Moment 是一个使用 InsForge Backend Service 开发的个人灵感记录应�
 - **删除管理**: 安全删除不需要的记录
 - **详情查看**: 查看灵感的完整信息
 
+### 👥 社交功能
+- **关注系统**: 关注其他用户，建立社交网络
+- **公开灵感**: 查看关注用户的公开灵感
+- **小组功能**: 创建和加入兴趣小组
+- **小组申请**: 申请加入私有小组，带有投票系统
+- **申请过期**: 小组申请一个月自动过期
+- **投票限制**: 每个成员对每个申请只能投一次票
+
+### 🔔 通知系统
+- **实时通知**: 关注、小组申请、投票等活动通知
+- **通知管理**: 标记已读、筛选、清空通知
+- **自动清理**: 过期申请自动处理并发送通知
+
 ## 🏗️ 技术架构
 
 ### 前端技术
@@ -43,6 +56,12 @@ Moment 是一个使用 InsForge Backend Service 开发的个人灵感记录应�
 - **PostgreSQL**: 可靠的关系型数据库
 - **PostgREST**: 自动 REST API 生成
 - **Row Level Security**: 数据安全控制
+- **Edge Functions**: Deno 运行时的无服务器函数
+
+### Edge Functions
+- **apply-to-group.js**: 处理小组申请逻辑
+- **submit-vote.js**: 处理投票提交和验证
+- **cleanup-expired-applications.js**: 自动清理过期申请
 
 ### 存储服务
 - **InsForge Storage**: 文件上传和管理
@@ -68,6 +87,84 @@ CREATE TABLE inspirations (
   is_private BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+#### 社交功能表结构
+
+##### `follows` 表 - 关注关系
+```sql
+CREATE TABLE follows (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  follower_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(follower_id, following_id)
+);
+```
+
+##### `groups` 表 - 小组信息
+```sql
+CREATE TABLE groups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  creator_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_private BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+##### `group_members` 表 - 小组成员
+```sql
+CREATE TABLE group_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(group_id, user_id)
+);
+```
+
+##### `group_applications` 表 - 小组申请
+```sql
+CREATE TABLE group_applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  applicant_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  message TEXT,
+  status TEXT DEFAULT 'pending',
+  expires_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '1 month'),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+##### `application_votes` 表 - 申请投票
+```sql
+CREATE TABLE application_votes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id UUID NOT NULL REFERENCES group_applications(id) ON DELETE CASCADE,
+  voter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  vote_type TEXT NOT NULL CHECK (vote_type IN ('approve', 'reject')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(application_id, voter_id)
+);
+```
+
+##### `notifications` 表 - 通知系统
+```sql
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  recipient_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
@@ -140,6 +237,20 @@ npm run build
 - **心情筛选**: 下拉选择特定心情
 - **收藏筛选**: 切换只显示收藏
 
+### 社交功能使用
+- **关注用户**: 在用户列表中点击关注按钮
+- **查看关注动态**: 查看关注用户的公开灵感
+- **创建小组**: 填写小组名称和描述
+- **申请加入**: 向私有小组提交申请
+- **投票审核**: 小组成员对申请进行投票
+- **通知管理**: 查看关注、申请、投票等通知
+
+### Edge Functions 功能
+- **智能申请**: 自动检查重复申请和过期状态
+- **投票验证**: 确保每人只能投票一次
+- **自动清理**: 定期处理过期申请并发送通知
+- **通知推送**: 实时推送相关活动通知
+
 ## 🎨 设计特色
 
 ### 视觉设计
@@ -188,6 +299,10 @@ moment/
 ├── app.js             # 主应用逻辑
 ├── package.json       # 项目配置
 ├── vite.config.js     # 构建配置
+├── functions/          # Edge Functions 目录
+│   ├── apply-to-group.js           # 小组申请处理
+│   ├── submit-vote.js              # 投票提交处理
+│   └── cleanup-expired-applications.js  # 过期申请清理
 └── README.md          # 项目文档
 ```
 
