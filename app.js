@@ -188,6 +188,19 @@ function setupEventListeners() {
     // Inspiration form
     inspirationForm.addEventListener('submit', handleInspirationSubmit);
 
+    // File upload - update file name display
+    const fileInput = document.getElementById('inspirationImage');
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const fileName = document.getElementById('fileName');
+            if (e.target.files && e.target.files[0]) {
+                fileName.textContent = e.target.files[0].name;
+            } else {
+                fileName.textContent = window.i18n ? window.i18n.t('inspiration.noFileChosen') : 'No file chosen';
+            }
+        });
+    }
+
     // Close modals when clicking outside
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
@@ -499,14 +512,27 @@ function showInspirationModal(inspiration = null) {
     const title = document.getElementById('modalTitle');
 
     if (inspiration) {
-        title.textContent = '编辑灵感';
+        title.setAttribute('data-i18n', 'inspiration.editTitle');
+        title.textContent = window.i18n ? window.i18n.t('inspiration.editTitle') : '编辑灵感';
         fillInspirationForm(inspiration);
     } else {
-        title.textContent = '记录灵感';
+        title.setAttribute('data-i18n', 'inspiration.createTitle');
+        title.textContent = window.i18n ? window.i18n.t('inspiration.createTitle') : '记录灵感';
         inspirationForm.reset();
+
+        // Reset file name display
+        const fileName = document.getElementById('fileName');
+        if (fileName) {
+            fileName.textContent = window.i18n ? window.i18n.t('inspiration.noFileChosen') : 'No file chosen';
+        }
     }
 
     modal.classList.remove('hidden');
+
+    // 更新模态框中的翻译
+    if (window.i18n) {
+        window.i18n.updatePageContent();
+    }
 }
 
 function hideInspirationModal() {
@@ -631,7 +657,7 @@ function editInspiration(id) {
 }
 
 async function deleteInspiration(id) {
-    if (!confirm('确定要删除这个灵感吗？此操作无法撤销。')) {
+    if (!confirm(window.i18n ? window.i18n.t('social.deleteInspirationConfirm') : '确定要删除这个灵感吗？此操作无法撤销。')) {
         return;
     }
 
@@ -643,15 +669,15 @@ async function deleteInspiration(id) {
             .eq('id', id);
 
         if (error) {
-            showToast('删除失败', 'error');
+            showToast(window.i18n ? window.i18n.t('social.deleteInspirationFailed') : '删除失败', 'error');
             return;
         }
 
-        showToast('删除成功', 'success');
+        showToast(window.i18n ? window.i18n.t('social.deleteInspirationSuccess') : '删除成功', 'success');
         await loadInspirations();
     } catch (error) {
         console.error('Delete inspiration error:', error);
-        showToast('删除失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.deleteInspirationFailed') : '删除失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -867,7 +893,7 @@ async function handleReplySubmit(e, inspirationId, parentCommentId, replyToUser 
     let content = textarea.value.trim();
 
     if (!content) {
-        showToast('请输入回复内容');
+        showToast(window.i18n ? window.i18n.t('social.pleaseEnterReply') : '请输入回复内容');
         return;
     }
 
@@ -888,12 +914,12 @@ async function handleReplySubmit(e, inspirationId, parentCommentId, replyToUser 
 
         if (error) {
             console.error('Error adding reply:', error);
-            showToast(error.message || '回复失败');
+            showToast(error.message || (window.i18n ? window.i18n.t('social.replyFailed') : '回复失败'));
             return;
         }
 
         textarea.value = '';
-        showToast('回复成功');
+        showToast(window.i18n ? window.i18n.t('social.replySuccess') : '回复成功');
 
         // Hide reply form
         form.remove();
@@ -903,7 +929,7 @@ async function handleReplySubmit(e, inspirationId, parentCommentId, replyToUser 
 
     } catch (error) {
         console.error('Error submitting reply:', error);
-        showToast('回复失败');
+        showToast(window.i18n ? window.i18n.t('social.replyFailed') : '回复失败');
     }
 }
 
@@ -948,11 +974,11 @@ function displayComments(comments) {
                 <div class="comment-content">${content}</div>
                 <div class="comment-actions">
                     <button class="comment-action-btn" onclick="showReplyForm('${comment.id}', '${comment.users?.nickname || ''}')">
-                        <i data-lucide="reply"></i> 回复
+                        <i data-lucide="reply"></i> ${window.i18n ? window.i18n.t('social.reply') : '回复'}
                     </button>
                     ${comment.user_id === currentUser?.user?.id ? `
                         <button class="comment-action-btn" onclick="deleteComment('${comment.id}')">
-                            <i data-lucide="trash-2"></i> 删除
+                            <i data-lucide="trash-2"></i> ${window.i18n ? window.i18n.t('social.deleteComment') : '删除'}
                         </button>
                     ` : ''}
                 </div>
@@ -975,9 +1001,10 @@ function showReplyForm(commentId, replyToUser) {
 
     const replyForm = document.createElement('form');
     replyForm.className = 'reply-form';
+    const placeholder = window.i18n ? window.i18n.t('social.replyTo', { user: replyToUser }) : `回复 @${replyToUser}...`;
     replyForm.innerHTML = `
         <div class="comment-input-group">
-            <textarea placeholder="回复 @${replyToUser}..." rows="2"></textarea>
+            <textarea placeholder="${placeholder}" rows="2"></textarea>
             <button type="submit" class="btn-primary btn-sm">
                 <i data-lucide="send"></i>
             </button>
@@ -997,7 +1024,7 @@ function showReplyForm(commentId, replyToUser) {
 }
 
 async function deleteComment(commentId) {
-    if (!confirm('确定要删除这条评论吗？')) {
+    if (!confirm(window.i18n ? window.i18n.t('social.deleteCommentConfirm') : '确定要删除这条评论吗？')) {
         return;
     }
 
@@ -1010,11 +1037,11 @@ async function deleteComment(commentId) {
 
         if (error) {
             console.error('Error deleting comment:', error);
-            showToast('删除评论失败');
+            showToast(window.i18n ? window.i18n.t('social.deleteCommentFailed') : '删除评论失败');
             return;
         }
 
-        showToast('评论已删除');
+        showToast(window.i18n ? window.i18n.t('social.commentDeleted') : '评论已删除');
 
         // Refresh comments
         const inspirationId = getCurrentInspirationId();
@@ -1024,7 +1051,7 @@ async function deleteComment(commentId) {
 
     } catch (error) {
         console.error('Error deleting comment:', error);
-        showToast('删除评论失败');
+        showToast(window.i18n ? window.i18n.t('social.deleteCommentFailed') : '删除评论失败');
     }
 }
 
@@ -1177,6 +1204,16 @@ function switchTab(tabName) {
 
         currentActiveTab = tabName;
 
+        // 更新翻译
+        if (window.i18n) {
+            window.i18n.updatePageContent();
+        }
+
+        // 重新初始化 Lucide 图标
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
         // 加载对应标签页的数据
         loadTabData(tabName);
     } else {
@@ -1261,7 +1298,7 @@ function renderMyGroups() {
     if (!container) return;
 
     if (myGroups.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>你还没有加入任何小组</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('group.noGroups') : '你还没有加入任何小组'}</p></div>`;
         return;
     }
 
@@ -1271,7 +1308,7 @@ function renderMyGroups() {
             <div class="group-name">${escapeHtml(group.name)}</div>
             <div class="group-description">${escapeHtml(group.description || '')}</div>
             <div class="group-meta">
-                <span>${group.member_count} 成员</span>
+                <span>${window.i18n ? window.i18n.t('group.membersCount', { count: group.member_count || 0 }) : `${group.member_count} 成员`}</span>
                 ${group.is_private ? '<span class="group-private">私有</span>' : ''}
             </div>
         </div>
@@ -1283,7 +1320,7 @@ function renderDiscoverGroups() {
     if (!container) return;
 
     if (discoverGroups.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>暂无可发现的小组</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('group.noDiscoverGroups') : '暂无可发现的小组'}</p></div>`;
         return;
     }
 
@@ -1293,8 +1330,8 @@ function renderDiscoverGroups() {
             <div class="group-name">${escapeHtml(group.name)}</div>
             <div class="group-description">${escapeHtml(group.description || '')}</div>
             <div class="group-meta">
-                <span>${group.member_count} 成员</span>
-                <button class="btn-primary" onclick="event.stopPropagation(); joinGroup('${group.id}')">加入</button>
+                <span>${window.i18n ? window.i18n.t('group.membersCount', { count: group.member_count || 0 }) : `${group.member_count} 成员`}</span>
+                <button class="btn-group-apply" onclick="event.stopPropagation(); showApplyGroupModal('${group.id}', ${escapeHtml(JSON.stringify(group))})">${window.i18n ? window.i18n.t('group.applyToJoin') : '申请加入'}</button>
             </div>
         </div>
     `).join('');
@@ -1352,7 +1389,7 @@ function renderFollowingUsers() {
     if (!container) return;
 
     if (followingUsers.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>你还没有关注任何人</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('social.noFollowing') : '你还没有关注任何人'}</p></div>`;
         return;
     }
 
@@ -1371,7 +1408,7 @@ function renderFollowers() {
     if (!container) return;
 
     if (followerUsers.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>还没有人关注你</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('social.noFollowers') : '还没有人关注你'}</p></div>`;
         return;
     }
 
@@ -1417,7 +1454,7 @@ function renderGroupInspirations() {
     if (!container) return;
 
     if (groupInspirations.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>还没有小组分享的灵感</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('social.noGroupInspirations') : '还没有小组分享的灵感'}</p></div>`;
         return;
     }
 
@@ -1478,7 +1515,7 @@ function renderDiscoverUsers() {
     if (!container) return;
 
     if (discoverUsers.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>没有更多用户可以发现</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('social.noDiscoverUsers') : '没有更多用户可以发现'}</p></div>`;
         return;
     }
 
@@ -1606,7 +1643,7 @@ async function showGroupDetail(groupId) {
 
         // 显示小组基本信息
         document.getElementById('groupDetailName').textContent = groupData.name;
-        document.getElementById('groupDetailDescription').textContent = groupData.description || '暂无描述';
+        document.getElementById('groupDetailDescription').textContent = groupData.description || (window.i18n ? window.i18n.t('group.noDescription') : '暂无描述');
 
         const avatarImg = document.getElementById('groupDetailAvatar');
         if (groupData.avatar_url) {
@@ -1638,7 +1675,7 @@ async function showGroupDetail(groupId) {
             await loadGroupPosts(groupId);
         } else {
             const postsContainer = document.getElementById('groupRecentInspirations');
-            postsContainer.innerHTML = '<div class="empty-state"><p>这是私有小组，只有成员可以查看内容</p></div>';
+            postsContainer.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('group.privateGroupContent') : '这是私有小组，只有成员可以查看内容'}</p></div>`;
         }
 
         // 显示模态框
@@ -1675,7 +1712,7 @@ async function loadGroupPosts(groupId) {
 
         const postsContainer = document.getElementById('groupRecentInspirations');
         if (!data || data.length === 0) {
-            postsContainer.innerHTML = '<div class="empty-state"><p>小组内还没有分享的灵感</p></div>';
+            postsContainer.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('group.noGroupPosts') : '小组内还没有分享的灵感'}</p></div>`;
             return;
         }
 
@@ -1761,7 +1798,7 @@ function showApplyGroupModal(groupId, groupData) {
 
     // 设置小组信息
     document.getElementById('applyGroupName').textContent = groupData.name;
-    document.getElementById('applyGroupDescription').textContent = groupData.description || '暂无描述';
+    document.getElementById('applyGroupDescription').textContent = groupData.description || (window.i18n ? window.i18n.t('group.noDescription') : '暂无描述');
 
     const avatarImg = document.getElementById('applyGroupAvatar');
     if (groupData.avatar_url) {
@@ -2044,6 +2081,11 @@ function showVoteApplicationModal(application) {
 // 模态框管理功能
 function showCreateGroupModal() {
     document.getElementById('createGroupModal').classList.remove('hidden');
+
+    // 更新模态框中的翻译
+    if (window.i18n) {
+        window.i18n.updatePageContent();
+    }
 }
 
 function hideCreateGroupModal() {
@@ -2167,7 +2209,7 @@ function renderGroupSelection(groups) {
     if (!container) return;
 
     if (groups.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>你还没有加入任何小组</p></div>';
+        container.innerHTML = `<div class="empty-state"><p>${window.i18n ? window.i18n.t('group.noGroups') : '你还没有加入任何小组'}</p></div>`;
         return;
     }
 
@@ -2299,18 +2341,18 @@ function changeLanguage(lang) {
 }
 
 function updateLanguageDisplay() {
-    const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'zh';
+    const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
 
     // 更新首页的语言显示
     const display = document.getElementById('currentLangDisplay');
     if (display) {
-        display.textContent = currentLang === 'zh' ? '中文' : 'EN';
+        display.textContent = currentLang === 'zh' ? '简体中文' : 'English';
     }
 
     // 更新登录页面的语言显示
     const loginDisplay = document.getElementById('loginCurrentLangDisplay');
     if (loginDisplay) {
-        loginDisplay.textContent = currentLang === 'zh' ? '中文' : 'EN';
+        loginDisplay.textContent = currentLang === 'zh' ? '简体中文' : 'English';
     }
 
     // 更新语言选项的激活状态

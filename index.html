@@ -224,20 +224,31 @@
                     </div>
                     <div class="header-actions">
                         <button id="addInspirationBtn" class="btn-primary">
-                            <i data-lucide="plus"></i> 记录灵感
+                            <i data-lucide="plus"></i> <span data-i18n="main.recordInspiration">记录灵感</span>
                         </button>
                         <button id="inboxBtn" class="btn-icon inbox-btn">
                             <i data-lucide="bell"></i>
                             <span id="unreadNotificationCount" class="notification-badge hidden">0</span>
                         </button>
+                        <div class="language-switcher">
+                            <button class="lang-btn" onclick="toggleLanguageMenu()">
+                                <i data-lucide="globe"></i>
+                                <span id="currentLangDisplay">English</span>
+                                <i data-lucide="chevron-down"></i>
+                            </button>
+                            <div class="lang-menu hidden" id="langMenu">
+                                <button class="lang-option" onclick="changeLanguage('zh')">简体中文</button>
+                                <button class="lang-option" onclick="changeLanguage('en')">English</button>
+                            </div>
+                        </div>
                         <div class="user-menu">
                             <button id="userMenuBtn" class="user-avatar">
                                 <img id="userAvatarImg" src="" alt="用户头像">
                                 <span id="userNickname"></span>
                             </button>
                             <div id="userDropdown" class="dropdown-menu hidden">
-                                <a href="#" id="profileBtn">个人资料</a>
-                                <a href="#" id="logoutBtn">退出登录</a>
+                                <a href="#" id="profileBtn" data-i18n="main.profile">个人资料</a>
+                                <a href="#" id="logoutBtn" data-i18n="common.logout">退出登录</a>
                             </div>
                         </div>
                     </div>
@@ -248,11 +259,11 @@
             <main class="main-content">
                 <!-- 导航标签页 -->
                 <div class="content-nav">
-                    <button class="nav-tab active" data-tab="personal">我的灵感</button>
-                    <button class="nav-tab" data-tab="groups">小组</button>
-                    <button class="nav-tab" data-tab="following">关注</button>
-                    <button class="nav-tab" data-tab="discover">发现</button>
-                    <button class="nav-tab" data-tab="notifications">通知</button>
+                    <button class="nav-tab active" data-tab="personal" data-i18n="main.myInspirations">我的灵感</button>
+                    <button class="nav-tab" data-tab="groups" data-i18n="main.groups">小组</button>
+                    <button class="nav-tab" data-tab="following" data-i18n="main.following">关注</button>
+                    <button class="nav-tab" data-tab="discover" data-i18n="main.discover">发现</button>
+                    <button class="nav-tab" data-tab="notifications" data-i18n="main.notifications">通知</button>
                 </div>
 
                 <!-- 个人灵感页面 -->
@@ -260,25 +271,25 @@
                     <!-- 搜索和筛选 -->
                     <div class="search-section">
                     <div class="search-bar">
-                        <input type="text" id="searchInput" placeholder="搜索灵感...">
-                        <button id="searchBtn">🔍</button>
+                        <input type="text" id="searchInput" data-i18n="common.search" placeholder="搜索灵感...">
+                        <button id="searchBtn" class="btn-icon"><i data-lucide="search"></i></button>
                     </div>
                     <div class="filters">
                         <select id="categoryFilter">
-                            <option value="">所有分类</option>
-                            <option value="idea">想法</option>
-                            <option value="quote">引言</option>
-                            <option value="thought">思考</option>
-                            <option value="solution">解决方案</option>
+                            <option value="" data-i18n="inspiration.allCategories">所有分类</option>
+                            <option value="idea" data-i18n="inspiration.categories.idea">想法</option>
+                            <option value="quote" data-i18n="inspiration.categories.quote">引言</option>
+                            <option value="reflection" data-i18n="inspiration.categories.reflection">思考</option>
+                            <option value="solution" data-i18n="inspiration.categories.solution">解决方案</option>
                         </select>
                         <select id="moodFilter">
-                            <option value="">所有心情</option>
-                            <option value="excited">兴奋</option>
-                            <option value="calm">平静</option>
-                            <option value="frustrated">沮丧</option>
-                            <option value="hopeful">充满希望</option>
+                            <option value="" data-i18n="inspiration.allMoods">All Moods</option>
+                            <option value="excited" data-i18n="inspiration.moods.excited">兴奋</option>
+                            <option value="calm" data-i18n="inspiration.moods.calm">平静</option>
+                            <option value="frustrated" data-i18n="inspiration.moods.frustrated">沮丧</option>
+                            <option value="hopeful" data-i18n="inspiration.moods.hopeful">充满希望</option>
                         </select>
-                        <button id="favoritesOnlyBtn" class="filter-btn">只看收藏</button>
+                        <button id="favoritesOnlyBtn" class="filter-btn" data-i18n="inspiration.favoritesOnly">Favorites Only</button>
                     </div>
                 </div>
 
@@ -290,23 +301,23 @@
                 <!-- 加载状态 -->
                 <div id="loadingSpinner" class="loading hidden">
                     <div class="spinner"></div>
-                    <p>加载中...</p>
+                    <p data-i18n="common.loading">加载中...</p>
                 </div>
 
                 <!-- 空状态 -->
                 <div id="emptyState" class="empty-state hidden">
                     <div class="empty-icon">💭</div>
-                    <h3>还没有记录任何灵感</h3>
-                    <p>点击"记录灵感"按钮开始记录你的第一个想法吧！</p>
-                    <button class="btn-primary" onclick="showInspirationModal()">记录第一个灵感</button>
+                    <h3 data-i18n="inspiration.noInspirationsTitle">还没有记录任何灵感</h3>
+                    <p data-i18n="inspiration.noInspirationsText">点击"记录灵感"按钮开始记录你的第一个想法吧！</p>
+                    <button class="btn-primary" onclick="showInspirationModal()" data-i18n="inspiration.recordFirstInspiration">记录第一个灵感</button>
                 </div>
                 </div>
 
                 <!-- 小组页面 -->
                 <div id="groupsTab" class="tab-content hidden">
                     <div class="groups-header">
-                        <h3>我的小组</h3>
-                        <button id="createGroupBtn" class="btn-primary"><i data-lucide="users"></i> 创建小组</button>
+                        <h3 data-i18n="group.myGroups">我的小组</h3>
+                        <button id="createGroupBtn" class="btn-primary"><i data-lucide="users"></i> <span data-i18n="group.createGroup">创建小组</span></button>
                     </div>
 
                     <div class="groups-grid" id="myGroupsList">
@@ -314,7 +325,7 @@
                     </div>
 
                     <div class="groups-header">
-                        <h3>发现小组</h3>
+                        <h3 data-i18n="group.discoverGroups">发现小组</h3>
                     </div>
 
                     <div class="groups-grid" id="discoverGroupsList">
@@ -325,7 +336,7 @@
                 <!-- 关注页面 -->
                 <div id="followingTab" class="tab-content hidden">
                     <div class="following-header">
-                        <h3>我关注的人</h3>
+                        <h3 data-i18n="social.followingUsers">我关注的人</h3>
                     </div>
 
                     <div class="following-grid" id="followingList">
@@ -333,7 +344,7 @@
                     </div>
 
                     <div class="following-header">
-                        <h3>关注我的人</h3>
+                        <h3 data-i18n="social.myFollowers">关注我的人</h3>
                     </div>
 
                     <div class="following-grid" id="followersList">
@@ -341,7 +352,7 @@
                     </div>
 
                     <div class="following-header">
-                        <h3>小组动态</h3>
+                        <h3 data-i18n="social.groupActivity">小组动态</h3>
                     </div>
 
                     <div class="inspirations-grid" id="groupInspirationsList">
@@ -352,10 +363,10 @@
                 <!-- 发现页面 -->
                 <div id="discoverTab" class="tab-content hidden">
                     <div class="discover-header">
-                        <h3>发现用户</h3>
+                        <h3 data-i18n="social.discoverUsers">发现用户</h3>
                         <div class="search-bar">
-                            <input type="text" id="userSearchInput" placeholder="搜索用户...">
-                            <button id="userSearchBtn">🔍</button>
+                            <input type="text" id="userSearchInput" data-i18n="social.searchUsers" placeholder="搜索用户...">
+                            <button id="userSearchBtn" class="btn-icon"><i data-lucide="search"></i></button>
                         </div>
                     </div>
 
@@ -367,24 +378,24 @@
                 <!-- 通知页面 -->
                 <div id="notificationsTab" class="tab-content hidden">
                     <div class="notifications-header">
-                        <h3>我的通知</h3>
+                        <h3 data-i18n="main.notifications">我的通知</h3>
                         <div class="notification-actions">
                             <button id="markAllReadBtn" class="btn-secondary">
-                                <i data-lucide="check-check"></i> 全部已读
+                                <i data-lucide="check-check"></i> <span data-i18n="notification.markAllAsRead">全部已读</span>
                             </button>
                             <button id="clearAllNotificationsBtn" class="btn-secondary">
-                                <i data-lucide="trash-2"></i> 清空通知
+                                <i data-lucide="trash-2"></i> <span data-i18n="notification.clearAll">清空通知</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- 通知筛选 -->
                     <div class="notification-filters">
-                        <button class="filter-btn active" data-filter="all">全部</button>
-                        <button class="filter-btn" data-filter="unread">未读</button>
-                        <button class="filter-btn" data-filter="like">点赞</button>
-                        <button class="filter-btn" data-filter="comment">评论</button>
-                        <button class="filter-btn" data-filter="reply">回复</button>
+                        <button class="filter-btn active" data-filter="all" data-i18n="common.all">全部</button>
+                        <button class="filter-btn" data-filter="unread" data-i18n="notification.unread">未读</button>
+                        <button class="filter-btn" data-filter="like" data-i18n="notification.types.like">点赞</button>
+                        <button class="filter-btn" data-filter="comment" data-i18n="notification.types.comment">评论</button>
+                        <button class="filter-btn" data-filter="reply" data-i18n="notification.reply">回复</button>
                     </div>
 
                     <!-- 通知列表 -->
@@ -414,62 +425,69 @@
         <div id="inspirationModal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 id="modalTitle">记录灵感</h3>
+                    <h3 id="modalTitle" data-i18n="inspiration.createTitle">记录灵感</h3>
                     <button class="modal-close" onclick="hideInspirationModal()">&times;</button>
                 </div>
                 <form id="inspirationForm" class="modal-body">
                     <div class="form-group">
-                        <label for="inspirationTitle">标题</label>
-                        <input type="text" id="inspirationTitle" placeholder="给你的灵感起个标题..." required>
+                        <label for="inspirationTitle" data-i18n="inspiration.title">标题</label>
+                        <input type="text" id="inspirationTitle" data-i18n="inspiration.placeholder.title" placeholder="给你的灵感起个标题..." required>
                     </div>
 
                     <div class="form-group">
-                        <label for="inspirationContent">内容</label>
-                        <textarea id="inspirationContent" placeholder="在这里记录你的灵感..." rows="6" required></textarea>
+                        <label for="inspirationContent" data-i18n="inspiration.content">内容</label>
+                        <textarea id="inspirationContent" data-i18n="inspiration.placeholder.content" placeholder="在这里记录你的灵感..." rows="6" required></textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="inspirationCategory">分类</label>
+                            <label for="inspirationCategory" data-i18n="inspiration.category">分类</label>
                             <select id="inspirationCategory">
-                                <option value="idea">想法</option>
-                                <option value="quote">引言</option>
-                                <option value="thought">思考</option>
-                                <option value="solution">解决方案</option>
+                                <option value="idea" data-i18n="inspiration.categories.idea">想法</option>
+                                <option value="quote" data-i18n="inspiration.categories.quote">引言</option>
+                                <option value="reflection" data-i18n="inspiration.categories.reflection">思考</option>
+                                <option value="solution" data-i18n="inspiration.categories.solution">解决方案</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="inspirationMood">心情</label>
+                            <label for="inspirationMood" data-i18n="inspiration.mood">心情</label>
                             <select id="inspirationMood">
-                                <option value="excited">兴奋</option>
-                                <option value="calm">平静</option>
-                                <option value="frustrated">沮丧</option>
-                                <option value="hopeful">充满希望</option>
+                                <option value="excited" data-i18n="inspiration.moods.excited">兴奋</option>
+                                <option value="calm" data-i18n="inspiration.moods.calm">平静</option>
+                                <option value="frustrated" data-i18n="inspiration.moods.frustrated">沮丧</option>
+                                <option value="hopeful" data-i18n="inspiration.moods.hopeful">充满希望</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="inspirationTags">标签</label>
-                        <input type="text" id="inspirationTags" placeholder="用逗号分隔多个标签...">
+                        <label for="inspirationTags" data-i18n="inspiration.tags">标签</label>
+                        <input type="text" id="inspirationTags" data-i18n="inspiration.placeholder.tags" placeholder="用逗号分隔多个标签...">
                     </div>
 
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="isPrivate">
-                            设为私有
+                            <span data-i18n="inspiration.isPrivate">设为私有</span>
                         </label>
                     </div>
 
                     <div class="form-group">
-                        <label for="inspirationImage">图片</label>
-                        <input type="file" id="inspirationImage" accept="image/*">
+                        <label data-i18n="inspiration.uploadImage">图片</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="inspirationImage" accept="image/*" class="file-input">
+                            <label for="inspirationImage" class="file-upload-label">
+                                <i data-lucide="upload"></i>
+                                <span class="file-upload-text" data-i18n="inspiration.chooseFile">Choose File</span>
+                            </label>
+                            <span class="file-name" id="fileName" data-i18n="inspiration.noFileChosen">No file chosen</span>
+                        </div>
                     </div>
 
                     <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="hideInspirationModal()">取消</button>
-                        <button type="submit" class="btn-primary">保存</button>
+                        <button type="button" class="btn-secondary" onclick="hideInspirationModal()" data-i18n="common.cancel">取消</button>
+                        <button type="submit" class="btn-primary" data-i18n="common.save">保存</button>
                     </div>
                 </form>
             </div>
@@ -504,18 +522,18 @@
                         </div>
                         <div class="stat-item">
                             <i data-lucide="message-circle"></i>
-                            <span id="commentCount">0</span> 评论
+                            <span id="commentCount">0</span> <span data-i18n="social.comments">评论</span>
                         </div>
                     </div>
 
                     <!-- 评论区域 -->
                     <div class="comments-section">
-                        <h4>评论</h4>
+                        <h4 data-i18n="social.comments">评论</h4>
 
                         <!-- 添加评论表单 -->
                         <form id="addCommentForm" class="add-comment-form">
                             <div class="comment-input-group">
-                                <textarea id="commentInput" placeholder="添加评论..." rows="2"></textarea>
+                                <textarea id="commentInput" data-i18n="social.addComment" placeholder="添加评论..." rows="2"></textarea>
                                 <button type="submit" class="btn-primary btn-sm">
                                     <i data-lucide="send"></i>
                                 </button>
@@ -530,13 +548,13 @@
                         <!-- 评论加载状态 -->
                         <div id="commentsLoading" class="loading-small hidden">
                             <div class="spinner-small"></div>
-                            <span>加载评论中...</span>
+                            <span data-i18n="social.loadingComments">加载评论中...</span>
                         </div>
 
                         <!-- 评论空状态 -->
                         <div id="commentsEmpty" class="empty-comments hidden">
                             <i data-lucide="message-circle"></i>
-                            <p>还没有评论，来发表第一个评论吧！</p>
+                            <p data-i18n="social.noComments">还没有评论，来发表第一个评论吧！</p>
                         </div>
                     </div>
                 </div>
@@ -770,5 +788,15 @@
     </div>
 
     <script type="module" src="./app.js"></script>
+    <script>
+        // 确保在页面加载时立即应用语言设置
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.i18n) {
+                setTimeout(() => {
+                    window.i18n.updatePageContent();
+                }, 100);
+            }
+        });
+    </script>
 </body>
 </html>

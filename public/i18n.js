@@ -116,7 +116,16 @@ const translations = {
                 title: '给你的灵感起个标题...',
                 content: '记录你的想法...',
                 tags: '输入标签，按回车添加'
-            }
+            },
+            searchPlaceholder: '搜索灵感...',
+            allCategories: '所有分类',
+            allMoods: '所有心情',
+            favoritesOnly: '只看收藏',
+            noInspirationsTitle: '还没有记录任何灵感',
+            noInspirationsText: '点击"记录灵感"按钮开始记录你的第一个想法吧！',
+            recordFirstInspiration: '记录第一个灵感',
+            chooseFile: '选择文件',
+            noFileChosen: '未选择任何文件'
         },
 
         // 小组相关
@@ -140,7 +149,14 @@ const translations = {
             votingInfo: '小于40人的小组需要超过1/2成员同意，40人及以上需要超过1/3成员同意',
             applicationPending: '申请审核中',
             voteToApprove: '投票通过',
-            voteToReject: '投票拒绝'
+            voteToReject: '投票拒绝',
+            noGroups: '你还没有加入任何小组',
+            noDiscoverGroups: '暂无可发现的小组',
+            noDescription: '暂无描述',
+            privateGroupContent: '这是私有小组，只有成员可以查看内容',
+            noGroupPosts: '小组内还没有分享的灵感',
+            membersCount: '{count} 位成员',
+            applyToJoin: '申请加入'
         },
 
         // 通知相关
@@ -159,7 +175,9 @@ const translations = {
             noNotifications: '暂无新通知',
             newApplication: '有用户申请加入"{groupName}"小组，请投票决定是否同意。',
             applicationApproved: '恭喜！您加入"{groupName}"小组的申请已通过。',
-            applicationRejected: '很遗憾，您加入"{groupName}"小组的申请未通过。'
+            applicationRejected: '很遗憾，您加入"{groupName}"小组的申请未通过。',
+            unread: '未读',
+            reply: '回复'
         },
 
         // 社交功能
@@ -173,7 +191,31 @@ const translations = {
             reply: '回复',
             share: '分享',
             writeComment: '写下你的评论...',
-            viewProfile: '查看主页'
+            viewProfile: '查看主页',
+            followingUsers: '我关注的人',
+            myFollowers: '关注我的人',
+            groupActivity: '小组动态',
+            discoverUsers: '发现用户',
+            searchUsers: '搜索用户...',
+            noFollowing: '你还没有关注任何人',
+            noFollowers: '还没有人关注你',
+            noGroupInspirations: '还没有小组分享的灵感',
+            noDiscoverUsers: '没有更多用户可以发现',
+            addComment: '添加评论...',
+            loadingComments: '加载评论中...',
+            noComments: '还没有评论，来发表第一个评论吧！',
+            replyTo: '回复 @{user}...',
+            deleteComment: '删除',
+            deleteCommentConfirm: '确定要删除这条评论吗？',
+            commentDeleted: '评论已删除',
+            deleteCommentFailed: '删除评论失败',
+            replySuccess: '回复成功',
+            replyFailed: '回复失败',
+            pleaseEnterReply: '请输入回复内容',
+            deleteInspiration: '删除',
+            deleteInspirationConfirm: '确定要删除这个灵感吗？此操作无法撤销。',
+            deleteInspirationSuccess: '删除成功',
+            deleteInspirationFailed: '删除失败'
         },
 
         // 错误信息
@@ -264,8 +306,8 @@ const translations = {
 
         // Main App
         main: {
-            recordInspiration: 'Record Inspiration',
-            myInspirations: 'My Inspirations',
+            recordInspiration: 'Record',
+            myInspirations: 'My Ideas',
             following: 'Following',
             discover: 'Discover',
             groups: 'Groups',
@@ -304,7 +346,16 @@ const translations = {
                 title: 'Give your inspiration a title...',
                 content: 'Record your thoughts...',
                 tags: 'Enter tags, press Enter to add'
-            }
+            },
+            searchPlaceholder: 'Search inspirations...',
+            allCategories: 'All Categories',
+            allMoods: 'All Moods',
+            favoritesOnly: 'Favorites Only',
+            noInspirationsTitle: 'No inspirations yet',
+            noInspirationsText: 'Click "Record Inspiration" to start recording your first thought!',
+            recordFirstInspiration: 'Record First Inspiration',
+            chooseFile: 'Choose File',
+            noFileChosen: 'No file chosen'
         },
 
         // Groups
@@ -328,7 +379,14 @@ const translations = {
             votingInfo: 'Groups with less than 40 members need over 1/2 approval, 40+ members need over 1/3 approval',
             applicationPending: 'Application under review',
             voteToApprove: 'Vote to Approve',
-            voteToReject: 'Vote to Reject'
+            voteToReject: 'Vote to Reject',
+            noGroups: 'You have not joined any groups yet',
+            noDiscoverGroups: 'No groups to discover',
+            noDescription: 'No description',
+            privateGroupContent: 'This is a private group, only members can view the content',
+            noGroupPosts: 'No shared inspirations in this group yet',
+            membersCount: '{count} members',
+            applyToJoin: 'Apply to Join'
         },
 
         // Notifications
@@ -347,7 +405,9 @@ const translations = {
             noNotifications: 'No new notifications',
             newApplication: 'A user has applied to join "{groupName}" group, please vote to decide.',
             applicationApproved: 'Congratulations! Your application to join "{groupName}" has been approved.',
-            applicationRejected: 'Sorry, your application to join "{groupName}" has been rejected.'
+            applicationRejected: 'Sorry, your application to join "{groupName}" has been rejected.',
+            unread: 'Unread',
+            reply: 'Reply'
         },
 
         // Social
@@ -361,7 +421,31 @@ const translations = {
             reply: 'Reply',
             share: 'Share',
             writeComment: 'Write your comment...',
-            viewProfile: 'View Profile'
+            viewProfile: 'View Profile',
+            followingUsers: 'People I Follow',
+            myFollowers: 'My Followers',
+            groupActivity: 'Group Activity',
+            discoverUsers: 'Discover Users',
+            searchUsers: 'Search users...',
+            noFollowing: 'You are not following anyone yet',
+            noFollowers: 'No one is following you yet',
+            noGroupInspirations: 'No group shared inspirations yet',
+            noDiscoverUsers: 'No more users to discover',
+            addComment: 'Add a comment...',
+            loadingComments: 'Loading comments...',
+            noComments: 'No comments yet, be the first to comment!',
+            replyTo: 'Reply to @{user}...',
+            deleteComment: 'Delete',
+            deleteCommentConfirm: 'Are you sure you want to delete this comment?',
+            commentDeleted: 'Comment deleted',
+            deleteCommentFailed: 'Failed to delete comment',
+            replySuccess: 'Reply posted',
+            replyFailed: 'Failed to post reply',
+            pleaseEnterReply: 'Please enter reply content',
+            deleteInspiration: 'Delete',
+            deleteInspirationConfirm: 'Are you sure you want to delete this inspiration? This action cannot be undone.',
+            deleteInspirationSuccess: 'Inspiration deleted',
+            deleteInspirationFailed: 'Failed to delete inspiration'
         },
 
         // Errors
@@ -380,7 +464,7 @@ const translations = {
 // i18n 管理器
 class I18nManager {
     constructor() {
-        this.currentLang = localStorage.getItem('language') || 'zh';
+        this.currentLang = localStorage.getItem('language') || 'en';
         this.translations = translations;
     }
 
@@ -436,6 +520,9 @@ class I18nManager {
                 element.placeholder = translation;
             } else if (element.hasAttribute('placeholder')) {
                 element.placeholder = translation;
+            } else if (element.tagName === 'OPTION') {
+                // 特殊处理 select option 元素
+                element.textContent = translation;
             } else {
                 // 处理包含HTML的特殊情况
                 if (key === 'homepage.ctaLogin') {
