@@ -643,7 +643,7 @@ async function handleInspirationSubmit(e) {
         await loadInspirations();
     } catch (error) {
         console.error('Save inspiration error:', error);
-        showToast('操作失败，请稍后重试', 'error');
+        showToast(window.i18n ? window.i18n.t('social.operationFailedRetry') : '操作失败，请稍后重试', 'error');
     } finally {
         showLoading(false);
     }
@@ -694,14 +694,14 @@ async function toggleFavorite(id) {
             .eq('id', id);
 
         if (error) {
-            showToast('操作失败', 'error');
+            showToast(window.i18n ? window.i18n.t('social.operationFailed') : '操作失败', 'error');
             return;
         }
 
         await loadInspirations();
     } catch (error) {
         console.error('Toggle favorite error:', error);
-        showToast('操作失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.operationFailed') : '操作失败', 'error');
     }
 }
 
@@ -714,15 +714,15 @@ function showInspirationDetail(id) {
     document.getElementById('detailContent').textContent = inspiration.content;
 
     document.getElementById('detailMeta').innerHTML = `
-        <span>分类：${getCategoryName(inspiration.category)}</span>
-        <span>心情：${getMoodName(inspiration.mood)}</span>
-        <span>创建时间：${formatDate(inspiration.created_at)}</span>
-        ${inspiration.is_private ? '<span>私有</span>' : ''}
-        ${inspiration.location_city ? `<span>${lucideIcon('map-pin')} 位置：${escapeHtml(inspiration.location_city)}</span>` : ''}
+        <span>${window.i18n ? window.i18n.t('social.detailCategory') : '分类：'}${getCategoryName(inspiration.category)}</span>
+        <span>${window.i18n ? window.i18n.t('social.detailMood') : '心情：'}${getMoodName(inspiration.mood)}</span>
+        <span>${window.i18n ? window.i18n.t('social.detailCreatedAt') : '创建时间：'}${formatDate(inspiration.created_at)}</span>
+        ${inspiration.is_private ? `<span>${window.i18n ? window.i18n.t('social.detailPrivate') : '私有'}</span>` : ''}
+        ${inspiration.location_city ? `<span>${lucideIcon('map-pin')} ${window.i18n ? window.i18n.t('social.detailLocation') : '位置：'}${escapeHtml(inspiration.location_city)}</span>` : ''}
         ${inspiration.weather_condition ? `
-            <span>${lucideIcon('cloud')} 天气：${escapeHtml(inspiration.weather_condition)}
+            <span>${lucideIcon('cloud')} ${window.i18n ? window.i18n.t('social.detailWeather') : '天气：'}${escapeHtml(inspiration.weather_condition)}
                 ${inspiration.weather_temperature !== null ? ` (${inspiration.weather_temperature}°C)` : ''}
-                ${inspiration.weather_humidity !== null ? ` 湿度${inspiration.weather_humidity}%` : ''}
+                ${inspiration.weather_humidity !== null ? ` ${window.i18n ? window.i18n.t('social.detailHumidity') : '湿度'}${inspiration.weather_humidity}%` : ''}
             </span>
         ` : ''}
     `;
@@ -806,7 +806,7 @@ async function loadCommentsAndLikes(inspirationId) {
 
 async function toggleLike(inspirationId) {
     if (!currentUser?.user?.id) {
-        showToast('请先登录');
+        showToast(window.i18n ? window.i18n.t('social.pleaseLogin') : '请先登录');
         return;
     }
 
@@ -818,14 +818,14 @@ async function toggleLike(inspirationId) {
 
         if (error) {
             console.error('Error toggling like:', error);
-            showToast(error.message || '操作失败');
+            showToast(error.message || (window.i18n ? window.i18n.t('social.operationFailed') : '操作失败'));
             return;
         }
 
         if (data.action === 'liked') {
-            showToast('点赞成功');
+            showToast(window.i18n ? window.i18n.t('social.likeSuccess') : '点赞成功');
         } else if (data.action === 'unliked') {
-            showToast('已取消点赞');
+            showToast(window.i18n ? window.i18n.t('social.unlikeSuccess') : '已取消点赞');
         }
 
         // Refresh likes display
@@ -833,7 +833,7 @@ async function toggleLike(inspirationId) {
 
     } catch (error) {
         console.error('Error toggling like:', error);
-        showToast('操作失败');
+        showToast(window.i18n ? window.i18n.t('social.operationFailed') : '操作失败');
     }
 }
 
@@ -841,7 +841,7 @@ async function handleCommentSubmit(e, inspirationId) {
     e.preventDefault();
 
     if (!currentUser?.user?.id) {
-        showToast('请先登录');
+        showToast(window.i18n ? window.i18n.t('social.pleaseLogin') : '请先登录');
         return;
     }
 
@@ -849,7 +849,7 @@ async function handleCommentSubmit(e, inspirationId) {
     const content = commentInput.value.trim();
 
     if (!content) {
-        showToast('请输入评论内容');
+        showToast(window.i18n ? window.i18n.t('social.commentRequired') : '请输入评论内容');
         return;
     }
 
@@ -864,19 +864,19 @@ async function handleCommentSubmit(e, inspirationId) {
 
         if (error) {
             console.error('Error adding comment:', error);
-            showToast(error.message || '评论失败');
+            showToast(error.message || (window.i18n ? window.i18n.t('social.commentFailed') : '评论失败'));
             return;
         }
 
         commentInput.value = '';
-        showToast('评论成功');
+        showToast(window.i18n ? window.i18n.t('social.commentSuccess') : '评论成功');
 
         // Refresh comments
         loadCommentsAndLikes(inspirationId);
 
     } catch (error) {
         console.error('Error submitting comment:', error);
-        showToast('评论失败');
+        showToast(window.i18n ? window.i18n.t('social.commentFailed') : '评论失败');
     }
 }
 
@@ -884,7 +884,7 @@ async function handleReplySubmit(e, inspirationId, parentCommentId, replyToUser 
     e.preventDefault();
 
     if (!currentUser?.user?.id) {
-        showToast('请先登录');
+        showToast(window.i18n ? window.i18n.t('social.pleaseLogin') : '请先登录');
         return;
     }
 
@@ -1567,11 +1567,11 @@ async function unfollowUser(userId) {
             .eq('following_id', userId);
 
         if (error) {
-            showToast('取消关注失败', 'error');
+            showToast(window.i18n ? window.i18n.t('social.unfollowFailed') : '取消关注失败', 'error');
             return;
         }
 
-        showToast('已取消关注', 'success');
+        showToast(window.i18n ? window.i18n.t('social.unfollowSuccess') : '已取消关注', 'success');
 
         // 刷新相关数据
         if (currentActiveTab === 'following') {
@@ -1579,7 +1579,7 @@ async function unfollowUser(userId) {
         }
     } catch (error) {
         console.error('Unfollow user error:', error);
-        showToast('取消关注失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.unfollowFailed') : '取消关注失败', 'error');
     }
 }
 
@@ -1728,7 +1728,7 @@ async function loadGroupPosts(groupId) {
                             <img class="user-avatar" src="${user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nickname || 'User')}&background=667eea&color=fff`}" alt="${user.nickname}">
                             <div>
                                 <div class="user-name">${escapeHtml(user.nickname || 'Unknown')}</div>
-                                <div class="post-date">分享于 ${sharedDate}</div>
+                                <div class="post-date">${window.i18n ? window.i18n.t('social.sharedAt') : '分享于'} ${sharedDate}</div>
                             </div>
                         </div>
                     </div>
@@ -2242,7 +2242,7 @@ function toggleGroupSelection(groupId) {
 
 async function handleConfirmShare() {
     if (!currentSharingInspiration || selectedGroups.length === 0) {
-        showToast('请选择要分享到的小组', 'error');
+        showToast(window.i18n ? window.i18n.t('social.selectGroupToShare') : '请选择要分享到的小组', 'error');
         return;
     }
 
@@ -2261,11 +2261,11 @@ async function handleConfirmShare() {
 
         await Promise.all(sharePromises);
 
-        showToast(`成功分享到 ${selectedGroups.length} 个小组`, 'success');
+        showToast(window.i18n ? window.i18n.t('social.shareSuccess', { count: selectedGroups.length }) : `成功分享到 ${selectedGroups.length} 个小组`, 'success');
         hideShareToGroupModal();
     } catch (error) {
         console.error('Share inspiration error:', error);
-        showToast('分享失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.shareFailed') : '分享失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -2510,11 +2510,11 @@ function displayNotifications() {
                 <div class="notification-actions-item">
                     ${!notification.is_read ? `
                         <button class="notification-action-btn" onclick="event.stopPropagation(); markNotificationAsRead('${notification.id}')">
-                            <i data-lucide="check"></i> 标记已读
+                            <i data-lucide="check"></i> ${window.i18n ? window.i18n.t('social.markAsReadText') : '标记已读'}
                         </button>
                     ` : ''}
                     <button class="notification-action-btn" onclick="event.stopPropagation(); deleteNotification('${notification.id}')">
-                        <i data-lucide="trash-2"></i> 删除
+                        <i data-lucide="trash-2"></i> ${window.i18n ? window.i18n.t('common.delete') : '删除'}
                     </button>
                 </div>
             </div>
@@ -2644,7 +2644,7 @@ async function markNotificationAsRead(notificationId) {
 }
 
 async function deleteNotification(notificationId) {
-    if (!confirm('确定要删除这条通知吗？')) {
+    if (!confirm(window.i18n ? window.i18n.t('social.deleteNotificationConfirm') : '确定要删除这条通知吗？')) {
         return;
     }
 
@@ -2657,7 +2657,7 @@ async function deleteNotification(notificationId) {
 
         if (error) {
             console.error('Error deleting notification:', error);
-            showToast('删除通知失败');
+            showToast(window.i18n ? window.i18n.t('social.deleteNotificationFailed') : '删除通知失败');
             return;
         }
 
@@ -2673,11 +2673,11 @@ async function deleteNotification(notificationId) {
             displayNotifications();
         }
 
-        showToast('通知已删除');
+        showToast(window.i18n ? window.i18n.t('social.notificationDeleted') : '通知已删除');
 
     } catch (error) {
         console.error('Error deleting notification:', error);
-        showToast('删除通知失败');
+        showToast(window.i18n ? window.i18n.t('social.deleteNotificationFailed') : '删除通知失败');
     }
 }
 
@@ -2710,7 +2710,7 @@ async function markAllNotificationsAsRead() {
 
         if (error) {
             console.error('Error marking all notifications as read:', error);
-            showToast('标记已读失败');
+            showToast(window.i18n ? window.i18n.t('social.markAsReadFailed') : '标记已读失败');
             return;
         }
 
@@ -2724,21 +2724,21 @@ async function markAllNotificationsAsRead() {
         updateNotificationBadge();
         displayNotifications();
 
-        showToast('所有通知已标记为已读');
+        showToast(window.i18n ? window.i18n.t('social.allNotificationsMarkedRead') : '所有通知已标记为已读');
 
     } catch (error) {
         console.error('Error marking all notifications as read:', error);
-        showToast('标记已读失败');
+        showToast(window.i18n ? window.i18n.t('social.markAsReadFailed') : '标记已读失败');
     }
 }
 
 async function clearAllNotifications() {
     if (notifications.length === 0) {
-        showToast('没有通知可清除');
+        showToast(window.i18n ? window.i18n.t('social.noNotificationsToClear') : '没有通知可清除');
         return;
     }
 
-    if (!confirm('确定要清空所有通知吗？此操作不可撤销。')) {
+    if (!confirm(window.i18n ? window.i18n.t('social.clearAllConfirm') : '确定要清空所有通知吗？此操作不可撤销。')) {
         return;
     }
 
@@ -2750,7 +2750,7 @@ async function clearAllNotifications() {
 
         if (error) {
             console.error('Error clearing all notifications:', error);
-            showToast('清空通知失败');
+            showToast(window.i18n ? window.i18n.t('social.clearNotificationsFailed') : '清空通知失败');
             return;
         }
 
@@ -2760,11 +2760,11 @@ async function clearAllNotifications() {
         updateNotificationBadge();
         displayNotifications();
 
-        showToast('所有通知已清空');
+        showToast(window.i18n ? window.i18n.t('social.allNotificationsCleared') : '所有通知已清空');
 
     } catch (error) {
         console.error('Error clearing all notifications:', error);
-        showToast('清空通知失败');
+        showToast(window.i18n ? window.i18n.t('social.clearNotificationsFailed') : '清空通知失败');
     }
 }
 
