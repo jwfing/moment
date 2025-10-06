@@ -1,5 +1,5 @@
-// Edge Function: 定期清理过期申请
-// 处理过期申请的清理，更新状态为 'expired' 并发送通知
+// Edge Function: Periodically clean up expired applications
+// Handles expired application cleanup, updates status to 'expired' and sends notifications
 
 module.exports = async function(request) {
     // CORS headers
@@ -15,7 +15,7 @@ module.exports = async function(request) {
     }
 
     if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: '仅支持 POST 请求' }), {
+        return new Response(JSON.stringify({ error: 'Only POST method is supported' }), {
             status: 405,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -27,7 +27,7 @@ module.exports = async function(request) {
         const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
 
         if (!userToken) {
-            return new Response(JSON.stringify({ error: '未授权访问' }), {
+            return new Response(JSON.stringify({ error: 'Unauthorized access' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -41,7 +41,7 @@ module.exports = async function(request) {
 
         const currentTime = new Date().toISOString();
 
-        // 查找所有过期的待处理申请
+        // Find all expired pending applications
         const { data: expiredApplications, error: findError } = await client.database
             .from('group_applications')
             .select(`
@@ -53,7 +53,7 @@ module.exports = async function(request) {
 
         if (findError) {
             console.error('Error finding expired applications:', findError);
-            return new Response(JSON.stringify({ error: '查找过期申请失败' }), {
+            return new Response(JSON.stringify({ error: 'Failed to find expired applications' }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -62,7 +62,7 @@ module.exports = async function(request) {
         if (!expiredApplications || expiredApplications.length === 0) {
             return new Response(JSON.stringify({
                 success: true,
-                message: '没有找到过期的申请',
+                message: 'No expired applications found',
                 expired_count: 0
             }), {
                 status: 200,
@@ -70,7 +70,7 @@ module.exports = async function(request) {
             });
         }
 
-        // 更新过期申请的状态
+        // Update expired application status
         const applicationIds = expiredApplications.map(app => app.id);
         const { error: updateError } = await client.database
             .from('group_applications')
@@ -82,29 +82,29 @@ module.exports = async function(request) {
 
         if (updateError) {
             console.error('Error updating expired applications:', updateError);
-            return new Response(JSON.stringify({ error: '更新过期申请状态失败' }), {
+            return new Response(JSON.stringify({ error: 'Failed to update expired application status' }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 为每个过期申请发送通知
+        // Send notification for each expired application
         const notifications = [];
         for (const application of expiredApplications) {
-            const groupName = application.groups?.name || '未知小组';
+            const groupName = application.groups?.name || 'Unknown Group';
 
             notifications.push({
                 recipient_id: application.applicant_id,
-                sender_id: null, // 系统通知
+                sender_id: null, // System notification
                 type: 'group_application_expired',
-                title: '申请已过期',
-                message: `很遗憾，您申请加入小组 "${groupName}" 的申请已过期。您可以重新提交申请。`,
+                title: 'Application Expired',
+                message: `Unfortunately, your application to join group "${groupName}" has expired. You can submit a new application.`,
                 related_inspiration_id: null,
                 related_comment_id: application.id
             });
         }
 
-        // 批量发送通知
+        // Send notifications in batch
         if (notifications.length > 0) {
             const { error: notificationError } = await client.database
                 .from('notifications')
@@ -112,13 +112,13 @@ module.exports = async function(request) {
 
             if (notificationError) {
                 console.error('Error sending expiration notifications:', notificationError);
-                // 通知发送失败不影响主要流程
+                // Notification failure does not affect main flow
             } else {
                 console.log(`Sent expiration notifications to ${notifications.length} applicants`);
             }
         }
 
-        // 清理相关的投票记录（可选，根据业务需求决定是否保留历史记录）
+        // Clean up related vote records (optional, keep history records based on business requirements)
         const { error: voteCleanupError } = await client.database
             .from('application_votes')
             .delete()
@@ -126,12 +126,12 @@ module.exports = async function(request) {
 
         if (voteCleanupError) {
             console.error('Error cleaning up votes:', voteCleanupError);
-            // 投票清理失败不影响主要流程
+            // Vote cleanup failure does not affect main flow
         }
 
         return new Response(JSON.stringify({
             success: true,
-            message: `成功处理了 ${expiredApplications.length} 个过期申请`,
+            message: `Successfully processed ${expiredApplications.length} expired applications`,
             expired_count: expiredApplications.length,
             expired_applications: expiredApplications.map(app => ({
                 id: app.id,
@@ -146,7 +146,7 @@ module.exports = async function(request) {
     } catch (error) {
         console.error('Function error:', error);
         return new Response(JSON.stringify({
-            error: '内部服务器错误',
+            error: 'Internal server error',
             details: error.message
         }), {
             status: 500,

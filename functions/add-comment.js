@@ -1,5 +1,5 @@
-// Edge Function: 添加评论，包含通知发送
-// 处理评论操作的完整流程，包括发送站内通知和处理@提及
+// Edge Function: Add comment with notification
+// Handles complete comment operation flow including sending in-app notifications and handling @ mentions
 
 module.exports = async function(request) {
     // CORS headers
@@ -15,7 +15,7 @@ module.exports = async function(request) {
     }
 
     if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: '仅支持 POST 请求' }), {
+        return new Response(JSON.stringify({ error: 'Only POST method is supported' }), {
             status: 405,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -27,7 +27,7 @@ module.exports = async function(request) {
         const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
 
         if (!userToken) {
-            return new Response(JSON.stringify({ error: '未授权访问' }), {
+            return new Response(JSON.stringify({ error: 'Unauthorized access' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -42,7 +42,7 @@ module.exports = async function(request) {
         // Get authenticated user
         const { data: userData } = await client.auth.getCurrentUser();
         if (!userData?.user?.id) {
-            return new Response(JSON.stringify({ error: '用户认证失败' }), {
+            return new Response(JSON.stringify({ error: 'User authentication failed' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -53,7 +53,7 @@ module.exports = async function(request) {
         const { inspiration_id, content, parent_comment_id = null } = body;
 
         if (!inspiration_id || !content?.trim()) {
-            return new Response(JSON.stringify({ error: '缺少必要参数' }), {
+            return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -67,7 +67,7 @@ module.exports = async function(request) {
             mentions.push(match[1]);
         }
 
-        // 添加评论到数据库
+        // Add comment to database
         const { data: comment, error: commentError } = await client.database
             .from('comments')
             .insert([{
@@ -82,22 +82,22 @@ module.exports = async function(request) {
 
         if (commentError) {
             console.error('Error adding comment:', commentError);
-            return new Response(JSON.stringify({ error: '评论失败' }), {
+            return new Response(JSON.stringify({ error: 'Failed to comment' }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 获取当前用户信息用于通知
+        // Get current user information for notification
         const { data: userProfile } = await client.database
             .from('profiles')
             .select('nickname')
             .eq('id', userData.user.id)
             .single();
 
-        const userNickname = userProfile?.nickname || '某位用户';
+        const userNickname = userProfile?.nickname || 'Someone';
 
-        // 1. 发送评论通知给灵感作者
+        // 1. Send comment notification to inspiration author
         try {
             const { data: inspiration } = await client.database
                 .from('inspirations')
@@ -112,8 +112,8 @@ module.exports = async function(request) {
                         user_id: inspiration.user_id,
                         sender_id: userData.user.id,
                         type: 'comment',
-                        title: '有人评论了你的灵感',
-                        message: `${userNickname} 评论了你的灵感 "${inspiration.title}": ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+                        title: 'Someone commented on your inspiration',
+                        message: `${userNickname} commented on your inspiration "${inspiration.title}": ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
                         related_id: inspiration_id,
                         is_read: false
                     }]);
@@ -124,7 +124,7 @@ module.exports = async function(request) {
             console.error('Error sending comment notification:', notificationError);
         }
 
-        // 2. 如果是回复评论，发送通知给被回复的用户
+        // 2. If replying to a comment, send notification to the replied user
         if (parent_comment_id) {
             try {
                 const { data: parentComment } = await client.database
@@ -140,8 +140,8 @@ module.exports = async function(request) {
                             user_id: parentComment.user_id,
                             sender_id: userData.user.id,
                             type: 'reply',
-                            title: '有人回复了你的评论',
-                            message: `${userNickname} 回复了你的评论: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+                            title: 'Someone replied to your comment',
+                            message: `${userNickname} replied to your comment: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
                             related_id: inspiration_id,
                             is_read: false
                         }]);
@@ -153,10 +153,10 @@ module.exports = async function(request) {
             }
         }
 
-        // 3. 发送@提及通知
+        // 3. Send @mention notifications
         if (mentions.length > 0) {
             try {
-                // 查找被提及的用户
+                // Find mentioned users
                 const { data: mentionedUsers } = await client.database
                     .from('profiles')
                     .select('id, nickname')
@@ -164,13 +164,13 @@ module.exports = async function(request) {
 
                 if (mentionedUsers && mentionedUsers.length > 0) {
                     const mentionNotifications = mentionedUsers
-                        .filter(user => user.id !== userData.user.id) // 排除自己
+                        .filter(user => user.id !== userData.user.id) // Exclude self
                         .map(user => ({
                             user_id: user.id,
                             sender_id: userData.user.id,
                             type: 'mention',
-                            title: '有人在评论中提到了你',
-                            message: `${userNickname} 在评论中提到了你: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+                            title: 'Someone mentioned you in a comment',
+                            message: `${userNickname} mentioned you in a comment: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
                             related_id: inspiration_id,
                             is_read: false
                         }));
@@ -188,7 +188,7 @@ module.exports = async function(request) {
             }
         }
 
-        // 返回成功结果，包含新创建的评论
+        // Return success result with newly created comment
         return new Response(JSON.stringify({
             success: true,
             comment: comment
@@ -200,7 +200,7 @@ module.exports = async function(request) {
     } catch (error) {
         console.error('Function error:', error);
         return new Response(JSON.stringify({
-            error: '内部服务器错误',
+            error: 'Internal server error',
             details: error.message
         }), {
             status: 500,

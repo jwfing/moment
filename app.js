@@ -252,7 +252,7 @@ async function handleLogin(e) {
         });
 
         if (error) {
-            showToast(error.message || '登录失败', 'error');
+            showToast(error.message || (window.i18n ? window.i18n.t('auth.loginFailed') : '登录失败'), 'error');
             return;
         }
 
@@ -262,7 +262,7 @@ async function handleLogin(e) {
         await loadInspirations();
     } catch (error) {
         console.error('Login error:', error);
-        showToast('登录失败，请稍后重试', 'error');
+        showToast(window.i18n ? window.i18n.t('auth.loginFailedRetry') : '登录失败，请稍后重试', 'error');
     } finally {
         showLoading(false);
     }
@@ -284,14 +284,14 @@ async function handleRegister(e) {
         });
 
         if (authError) {
-            showToast(authError.message || '注册失败', 'error');
+            showToast(authError.message || (window.i18n ? window.i18n.t('auth.registerFailed') : '注册失败'), 'error');
             return;
         }
 
         // Update profile
         await client.auth.setProfile({
             nickname,
-            bio: '灵感记录者'
+            bio: window.i18n ? window.i18n.t('auth.defaultBio') : '灵感记录者'
         });
 
         currentUser = authData;
@@ -300,7 +300,7 @@ async function handleRegister(e) {
         await loadInspirations();
     } catch (error) {
         console.error('Register error:', error);
-        showToast('注册失败，请稍后重试', 'error');
+        showToast(window.i18n ? window.i18n.t('auth.registerFailedRetry') : '注册失败，请稍后重试', 'error');
     } finally {
         showLoading(false);
     }
@@ -315,7 +315,7 @@ async function handleOAuthLogin(provider) {
         });
 
         if (error) {
-            showToast(error.message || 'OAuth登录失败', 'error');
+            showToast(error.message || (window.i18n ? window.i18n.t('auth.oauthFailed') : 'OAuth登录失败'), 'error');
             return;
         }
 
@@ -324,7 +324,7 @@ async function handleOAuthLogin(provider) {
         }
     } catch (error) {
         console.error('OAuth error:', error);
-        showToast('OAuth登录失败，请稍后重试', 'error');
+        showToast(window.i18n ? window.i18n.t('auth.oauthFailedRetry') : 'OAuth登录失败，请稍后重试', 'error');
     }
 }
 
@@ -334,10 +334,10 @@ async function handleLogout() {
         currentUser = null;
         inspirations = [];
         showLoginPage();
-        showToast('已退出登录', 'success');
+        showToast(window.i18n ? window.i18n.t('auth.logoutSuccess') : '已退出登录', 'success');
     } catch (error) {
         console.error('Logout error:', error);
-        showToast('退出登录失败', 'error');
+        showToast(window.i18n ? window.i18n.t('auth.logoutFailed') : '退出登录失败', 'error');
     }
 }
 
@@ -378,7 +378,7 @@ async function loadInspirations() {
             .order('created_at', { ascending: false });
 
         if (error) {
-            showToast('加载灵感失败', 'error');
+            showToast(window.i18n ? window.i18n.t('inspiration.loadFailed') : '加载灵感失败', 'error');
             return;
         }
 
@@ -387,7 +387,7 @@ async function loadInspirations() {
         renderInspirations();
     } catch (error) {
         console.error('Load inspirations error:', error);
-        showToast('加载灵感失败', 'error');
+        showToast(window.i18n ? window.i18n.t('inspiration.loadFailed') : '加载灵感失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -414,9 +414,9 @@ function renderInspirations() {
             <div class="card-meta">
                 <span class="card-tag">${getCategoryName(inspiration.category)}</span>
                 <span class="card-tag">${getMoodName(inspiration.mood)}</span>
-                ${inspiration.is_private ? '<span class="card-tag">私有</span>' : ''}
+                ${inspiration.is_private ? `<span class="card-tag">${window.i18n ? window.i18n.t('inspiration.private') : '私有'}</span>` : ''}
             </div>
-            ${inspiration.image_url ? `<img src="${inspiration.image_url}" alt="灵感图片" class="card-image">` : ''}
+            ${inspiration.image_url ? `<img src="${inspiration.image_url}" alt="${window.i18n ? window.i18n.t('inspiration.imageAlt') : '灵感图片'}" class="card-image">` : ''}
             <div class="card-content">${escapeHtml(inspiration.content)}</div>
             ${inspiration.tags && inspiration.tags.length > 0 ? `
                 <div class="card-footer">
@@ -573,7 +573,7 @@ async function handleInspirationSubmit(e) {
                 .uploadAuto(imageFile);
 
             if (uploadError) {
-                showToast('图片上传失败', 'error');
+                showToast(window.i18n ? window.i18n.t('inspiration.imageUploadFailed') : '图片上传失败', 'error');
                 return;
             }
 
@@ -601,11 +601,11 @@ async function handleInspirationSubmit(e) {
                 .single();
 
             if (error) {
-                showToast('更新灵感失败', 'error');
+                showToast(window.i18n ? window.i18n.t('inspiration.updateFailed') : '更新灵感失败', 'error');
                 return;
             }
 
-            showToast('灵感更新成功！', 'success');
+            showToast(window.i18n ? window.i18n.t('inspiration.updateSuccess') : '灵感更新成功！', 'success');
         } else {
             // Create new inspiration with location and weather info
             const { data: functionResult, error } = await client.functions.invoke('create-inspiration', {
@@ -614,18 +614,18 @@ async function handleInspirationSubmit(e) {
 
             if (error) {
                 console.error('Function invoke error:', error);
-                showToast('保存灵感失败', 'error');
+                showToast(window.i18n ? window.i18n.t('inspiration.saveFailed') : '保存灵感失败', 'error');
                 return;
             }
 
             if (!functionResult.success) {
                 console.error('Function returned error:', functionResult.error);
-                showToast(functionResult.error || '保存灵感失败', 'error');
+                showToast(functionResult.error || (window.i18n ? window.i18n.t('inspiration.saveFailed') : '保存灵感失败'), 'error');
                 return;
             }
 
             // Show success message with location and weather info
-            let successMessage = '灵感记录成功！';
+            let successMessage = window.i18n ? window.i18n.t('inspiration.saveSuccess') : '灵感记录成功！';
             if (functionResult.location && functionResult.location.city) {
                 successMessage += ` 📍 ${functionResult.location.city}`;
             }
@@ -1106,7 +1106,9 @@ function hideToast() {
 
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
+    // Use current i18n locale, fallback to 'en-US'
+    const locale = window.i18n?.locale || 'en-US';
+    return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -1116,23 +1118,29 @@ function formatDate(dateString) {
 }
 
 function getCategoryName(category) {
-    const categories = {
-        'idea': '想法',
-        'quote': '引言',
-        'thought': '思考',
-        'solution': '解决方案'
-    };
-    return categories[category] || category;
+    if (!window.i18n) {
+        const categories = {
+            'idea': '想法',
+            'quote': '引言',
+            'thought': '思考',
+            'solution': '解决方案'
+        };
+        return categories[category] || category;
+    }
+    return window.i18n.t(`category.${category}`) || category;
 }
 
 function getMoodName(mood) {
-    const moods = {
-        'excited': '兴奋',
-        'calm': '平静',
-        'frustrated': '沮丧',
-        'hopeful': '充满希望'
-    };
-    return moods[mood] || mood;
+    if (!window.i18n) {
+        const moods = {
+            'excited': '兴奋',
+            'calm': '平静',
+            'frustrated': '沮丧',
+            'hopeful': '充满希望'
+        };
+        return moods[mood] || mood;
+    }
+    return window.i18n.t(`mood.${mood}`) || mood;
 }
 
 function escapeHtml(text) {
@@ -1267,7 +1275,7 @@ async function loadGroups() {
             .eq('user_id', currentUser.user.id);
 
         if (myGroupsError) {
-            console.error('加载我的小组失败:', myGroupsError);
+            console.error('Error loading my groups:', myGroupsError);
         } else {
             myGroups = myGroupsData?.map(item => item.groups) || [];
             renderMyGroups();
@@ -1281,7 +1289,7 @@ async function loadGroups() {
             .limit(10);
 
         if (allGroupsError) {
-            console.error('加载发现小组失败:', allGroupsError);
+            console.error('Error loading discover groups:', allGroupsError);
         } else {
             const myGroupIds = myGroups.map(g => g.id);
             discoverGroups = allGroupsData?.filter(group => !myGroupIds.includes(group.id)) || [];
@@ -1289,7 +1297,7 @@ async function loadGroups() {
         }
     } catch (error) {
         console.error('Error loading groups:', error);
-        showToast('加载小组失败', 'error');
+        showToast(window.i18n ? window.i18n.t('group.loadFailed') : '加载小组失败', 'error');
     }
 }
 
@@ -1309,7 +1317,7 @@ function renderMyGroups() {
             <div class="group-description">${escapeHtml(group.description || '')}</div>
             <div class="group-meta">
                 <span>${window.i18n ? window.i18n.t('group.membersCount', { count: group.member_count || 0 }) : `${group.member_count} 成员`}</span>
-                ${group.is_private ? '<span class="group-private">私有</span>' : ''}
+                ${group.is_private ? `<span class="group-private">${window.i18n ? window.i18n.t('group.private') : '私有'}</span>` : ''}
             </div>
         </div>
     `).join('');
@@ -1352,7 +1360,7 @@ async function loadFollowingData() {
             .eq('follower_id', currentUser.user.id);
 
         if (followingError) {
-            console.error('加载关注列表失败:', followingError);
+            console.error('Error loading following list:', followingError);
         } else {
             followingUsers = followingData?.map(item => item.users) || [];
             renderFollowingUsers();
@@ -1370,7 +1378,7 @@ async function loadFollowingData() {
             .eq('following_id', currentUser.user.id);
 
         if (followersError) {
-            console.error('加载粉丝列表失败:', followersError);
+            console.error('Error loading followers list:', followersError);
         } else {
             followerUsers = followersData?.map(item => item.users) || [];
             renderFollowers();
@@ -1380,7 +1388,7 @@ async function loadFollowingData() {
         await loadGroupInspirations();
     } catch (error) {
         console.error('Error loading following data:', error);
-        showToast('加载关注数据失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.loadFollowingFailed') : '加载关注数据失败', 'error');
     }
 }
 
@@ -1398,7 +1406,7 @@ function renderFollowingUsers() {
             <img class="user-avatar" src="${user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nickname || user.id)}&background=667eea&color=fff`}" alt="${user.nickname}">
             <div class="user-nickname">${escapeHtml(user.nickname || 'Unknown')}</div>
             <div class="user-bio">${escapeHtml(user.bio || '')}</div>
-            <button class="follow-btn following" onclick="event.stopPropagation(); unfollowUser('${user.id}')">已关注</button>
+            <button class="follow-btn following" onclick="event.stopPropagation(); unfollowUser('${user.id}')">${window.i18n ? window.i18n.t('social.following') : '已关注'}</button>
         </div>
     `).join('');
 }
@@ -1524,7 +1532,7 @@ function renderDiscoverUsers() {
             <img class="user-avatar" src="${user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nickname || user.id)}&background=667eea&color=fff`}" alt="${user.nickname}">
             <div class="user-nickname">${escapeHtml(user.nickname || 'Unknown')}</div>
             <div class="user-bio">${escapeHtml(user.bio || '')}</div>
-            <button class="follow-btn" onclick="event.stopPropagation(); followUser('${user.id}')">关注</button>
+            <button class="follow-btn" onclick="event.stopPropagation(); followUser('${user.id}')">${window.i18n ? window.i18n.t('social.follow') : '关注'}</button>
         </div>
     `).join('');
 }
@@ -1540,11 +1548,11 @@ async function followUser(userId) {
             }]);
 
         if (error) {
-            showToast('关注失败', 'error');
+            showToast(window.i18n ? window.i18n.t('social.followFailed') : '关注失败', 'error');
             return;
         }
 
-        showToast('关注成功', 'success');
+        showToast(window.i18n ? window.i18n.t('social.followSuccess') : '关注成功', 'success');
 
         // 刷新相关数据
         if (currentActiveTab === 'following') {
@@ -1554,7 +1562,7 @@ async function followUser(userId) {
         }
     } catch (error) {
         console.error('Follow user error:', error);
-        showToast('关注失败', 'error');
+        showToast(window.i18n ? window.i18n.t('social.followFailed') : '关注失败', 'error');
     }
 }
 
@@ -1594,7 +1602,7 @@ async function joinGroup(groupId) {
             }]);
 
         if (error) {
-            showToast('加入小组失败', 'error');
+            showToast(window.i18n ? window.i18n.t('group.joinFailed') : '加入小组失败', 'error');
             return;
         }
 
@@ -1604,11 +1612,11 @@ async function joinGroup(groupId) {
             .update({ member_count: client.database.raw('member_count + 1') })
             .eq('id', groupId);
 
-        showToast('成功加入小组', 'success');
+        showToast(window.i18n ? window.i18n.t('group.joinSuccess') : '成功加入小组', 'success');
         await loadGroups();
     } catch (error) {
         console.error('Join group error:', error);
-        showToast('加入小组失败', 'error');
+        showToast(window.i18n ? window.i18n.t('group.joinFailed') : '加入小组失败', 'error');
     }
 }
 
@@ -1625,8 +1633,8 @@ async function showGroupDetail(groupId) {
             .single();
 
         if (groupError) {
-            console.error('获取小组信息失败:', groupError);
-            showToast('获取小组信息失败', 'error');
+            console.error('Error getting group info:', groupError);
+            showToast(window.i18n ? window.i18n.t('group.getInfoFailed') : '获取小组信息失败', 'error');
             return;
         }
 
@@ -1663,7 +1671,7 @@ async function showGroupDetail(groupId) {
         } else if (!groupData.is_private) {
             joinBtn.style.display = 'inline-block';
             leaveBtn.style.display = 'none';
-            joinBtn.textContent = '申请加入';
+            joinBtn.textContent = window.i18n ? window.i18n.t('group.applyToJoin') : '申请加入';
             joinBtn.onclick = () => showApplyGroupModal(groupId, groupData);
         } else {
             joinBtn.style.display = 'none';
@@ -1681,8 +1689,8 @@ async function showGroupDetail(groupId) {
         // 显示模态框
         document.getElementById('groupDetailModal').classList.remove('hidden');
     } catch (error) {
-        console.error('显示小组详情失败:', error);
-        showToast('显示小组详情失败', 'error');
+        console.error('Error showing group detail:', error);
+        showToast(window.i18n ? window.i18n.t('group.showDetailFailed') : '显示小组详情失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -1706,7 +1714,7 @@ async function loadGroupPosts(groupId) {
             .limit(20);
 
         if (error) {
-            console.error('加载小组灵感失败:', error);
+            console.error('Error loading group posts:', error);
             return;
         }
 
@@ -1746,7 +1754,7 @@ async function loadGroupPosts(groupId) {
             `;
         }).join('');
     } catch (error) {
-        console.error('加载小组帖子失败:', error);
+        console.error('Error loading group posts:', error);
     }
 }
 
@@ -1765,7 +1773,7 @@ async function leaveGroup(groupId) {
             .eq('user_id', currentUser.user.id);
 
         if (error) {
-            showToast('退出小组失败', 'error');
+            showToast(window.i18n ? window.i18n.t('group.leaveFailed') : '退出小组失败', 'error');
             return;
         }
 
@@ -1775,14 +1783,14 @@ async function leaveGroup(groupId) {
             .update({ member_count: client.database.raw('member_count - 1') })
             .eq('id', groupId);
 
-        showToast('已退出小组', 'success');
+        showToast(window.i18n ? window.i18n.t('group.leaveSuccess') : '已退出小组', 'success');
         await loadGroups();
 
         // 关闭详情模态框
         document.getElementById('groupDetailModal').classList.add('hidden');
     } catch (error) {
-        console.error('退出小组失败:', error);
-        showToast('退出小组失败', 'error');
+        console.error('Error leaving group:', error);
+        showToast(window.i18n ? window.i18n.t('group.leaveFailed') : '退出小组失败', 'error');
     }
 }
 
@@ -1811,9 +1819,13 @@ function showApplyGroupModal(groupId, groupData) {
     const memberCount = groupData.member_count || 1;
     let requirement;
     if (memberCount < 40) {
-        requirement = `小组现有 ${memberCount} 名成员，需要超过一半成员（${Math.ceil(memberCount / 2)} 票）同意您的申请。`;
+        requirement = window.i18n ?
+            window.i18n.t('group.votingRequirementHalf', { total: memberCount, required: Math.ceil(memberCount / 2) }) :
+            `小组现有 ${memberCount} 名成员，需要超过一半成员（${Math.ceil(memberCount / 2)} 票）同意您的申请。`;
     } else {
-        requirement = `小组现有 ${memberCount} 名成员，需要超过三分之一成员（${Math.ceil(memberCount / 3)} 票）同意您的申请。`;
+        requirement = window.i18n ?
+            window.i18n.t('group.votingRequirementThird', { total: memberCount, required: Math.ceil(memberCount / 3) }) :
+            `小组现有 ${memberCount} 名成员，需要超过三分之一成员（${Math.ceil(memberCount / 3)} 票）同意您的申请。`;
     }
     document.getElementById('votingRequirement').textContent = requirement;
 
@@ -1833,13 +1845,13 @@ async function handleGroupApplication(e) {
     e.preventDefault();
 
     if (!currentApplyingGroup || !currentUser?.user?.id) {
-        showToast('申请失败', 'error');
+        showToast(window.i18n ? window.i18n.t('group.applicationFailed') : '申请失败', 'error');
         return;
     }
 
     const message = document.getElementById('applicationMessage').value.trim();
     if (!message) {
-        showToast('请填写申请理由', 'error');
+        showToast(window.i18n ? window.i18n.t('group.applicationMessageRequired') : '请填写申请理由', 'error');
         return;
     }
 
@@ -1855,20 +1867,20 @@ async function handleGroupApplication(e) {
         });
 
         if (error) {
-            console.error('申请提交失败:', error);
-            showToast(error.message || '申请提交失败', 'error');
+            console.error('Error submitting application:', error);
+            showToast(error.message || (window.i18n ? window.i18n.t('group.applicationSubmitFailed') : '申请提交失败'), 'error');
             return;
         }
 
-        showToast(data.message || '申请已提交，等待小组成员投票', 'success');
+        showToast(data.message || (window.i18n ? window.i18n.t('group.applicationSubmitted') : '申请已提交，等待小组成员投票'), 'success');
         hideApplyGroupModal();
 
         // 清空表单
         document.getElementById('applicationMessage').value = '';
 
     } catch (error) {
-        console.error('申请提交失败:', error);
-        showToast('申请提交失败', 'error');
+        console.error('Error submitting application:', error);
+        showToast(window.i18n ? window.i18n.t('group.applicationSubmitFailed') : '申请提交失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -1905,8 +1917,8 @@ async function loadApplicationForVoting(applicationId) {
             .single();
 
         if (appError) {
-            console.error('获取申请详情失败:', appError);
-            showToast('加载申请信息失败', 'error');
+            console.error('Error getting application details:', appError);
+            showToast(window.i18n ? window.i18n.t('group.loadApplicationFailed') : '加载申请信息失败', 'error');
             return;
         }
 
@@ -1928,7 +1940,8 @@ async function loadApplicationForVoting(applicationId) {
         // 设置投票进度
         const progress = (application.votes_received / application.votes_needed) * 100;
         document.getElementById('voteProgressBar').style.width = `${progress}%`;
-        document.getElementById('voteStatusText').textContent =
+        document.getElementById('voteStatusText').textContent = window.i18n ?
+            window.i18n.t('group.voteProgress', { received: application.votes_received, needed: application.votes_needed }) :
             `投票进度: ${application.votes_received}/${application.votes_needed}`;
 
         // 检查用户是否已经投票
@@ -1945,18 +1958,18 @@ async function loadApplicationForVoting(applicationId) {
         if (existingVote && !voteError) {
             // 用户已经投票，显示投票结果
             if (existingVote.vote) {
-                approveBtn.textContent = '✓ 已同意';
+                approveBtn.textContent = window.i18n ? window.i18n.t('group.voteApproved') : '✓ 已同意';
                 approveBtn.disabled = true;
                 rejectBtn.disabled = true;
             } else {
-                rejectBtn.textContent = '✗ 已拒绝';
+                rejectBtn.textContent = window.i18n ? window.i18n.t('group.voteRejected') : '✗ 已拒绝';
                 approveBtn.disabled = true;
                 rejectBtn.disabled = true;
             }
         } else {
             // 用户未投票，设置投票按钮
-            approveBtn.textContent = '同意加入';
-            rejectBtn.textContent = '拒绝申请';
+            approveBtn.textContent = window.i18n ? window.i18n.t('group.approveJoin') : '同意加入';
+            rejectBtn.textContent = window.i18n ? window.i18n.t('group.rejectApplication') : '拒绝申请';
             approveBtn.disabled = false;
             rejectBtn.disabled = false;
             approveBtn.onclick = () => submitVote(applicationId, true);
@@ -1967,8 +1980,8 @@ async function loadApplicationForVoting(applicationId) {
         document.getElementById('voteNotificationModal').classList.remove('hidden');
 
     } catch (error) {
-        console.error('加载申请投票失败:', error);
-        showToast('加载申请信息失败', 'error');
+        console.error('Error loading application for voting:', error);
+        showToast(window.i18n ? window.i18n.t('group.loadApplicationFailed') : '加载申请信息失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -1987,26 +2000,28 @@ async function submitVote(applicationId, vote) {
         });
 
         if (error) {
-            console.error('投票失败:', error);
-            showToast(error.message || '投票失败', 'error');
+            console.error('Error submitting vote:', error);
+            showToast(error.message || (window.i18n ? window.i18n.t('group.voteFailed') : '投票失败'), 'error');
             return;
         }
 
         // 显示结果消息
-        showToast(data.message || (vote ? '已投赞成票' : '已投反对票'), 'success');
+        showToast(data.message || (vote ?
+            (window.i18n ? window.i18n.t('group.voteApproveSuccess') : '已投赞成票') :
+            (window.i18n ? window.i18n.t('group.voteRejectSuccess') : '已投反对票')), 'success');
 
         // 如果申请已通过，显示额外消息
         if (data.application_approved) {
             setTimeout(() => {
-                showToast('申请已通过，申请人已自动加入小组！', 'success');
+                showToast(window.i18n ? window.i18n.t('group.applicationApprovedAuto') : '申请已通过，申请人已自动加入小组！', 'success');
             }, 1500);
         }
 
         hideVoteNotificationModal();
 
     } catch (error) {
-        console.error('投票失败:', error);
-        showToast('投票失败', 'error');
+        console.error('Error submitting vote:', error);
+        showToast(window.i18n ? window.i18n.t('group.voteFailed') : '投票失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -2028,11 +2043,11 @@ function showVoteApplicationModal(application) {
     const approveBtn = document.getElementById('approveVoteBtn');
     const rejectBtn = document.getElementById('rejectVoteBtn');
 
-    if (applicantName) applicantName.textContent = application.users?.nickname || '未知用户';
+    if (applicantName) applicantName.textContent = application.users?.nickname || (window.i18n ? window.i18n.t('common.unknownUser') : '未知用户');
     if (applicantAvatar) {
         applicantAvatar.src = application.users?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${application.users?.nickname || 'user'}`;
     }
-    if (applicationMessage) applicationMessage.textContent = application.message || '无申请消息';
+    if (applicationMessage) applicationMessage.textContent = application.message || (window.i18n ? window.i18n.t('group.noApplicationMessage') : '无申请消息');
 
     // 显示申请时间
     if (applicationDate) {
@@ -2046,10 +2061,14 @@ function showVoteApplicationModal(application) {
         const daysRemaining = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
 
         if (daysRemaining > 0) {
-            applicationExpiry.textContent = `${expiryDate.toLocaleDateString()} (还剩${daysRemaining}天)`;
+            applicationExpiry.textContent = window.i18n ?
+                window.i18n.t('group.expiryDaysRemaining', { date: expiryDate.toLocaleDateString(), days: daysRemaining }) :
+                `${expiryDate.toLocaleDateString()} (还剩${daysRemaining}天)`;
             applicationExpiry.style.color = daysRemaining <= 3 ? '#ef4444' : '#6b7280';
         } else {
-            applicationExpiry.textContent = `${expiryDate.toLocaleDateString()} (已过期)`;
+            applicationExpiry.textContent = window.i18n ?
+                window.i18n.t('group.expiryExpired', { date: expiryDate.toLocaleDateString() }) :
+                `${expiryDate.toLocaleDateString()} (已过期)`;
             applicationExpiry.style.color = '#ef4444';
         }
     }
@@ -2057,7 +2076,9 @@ function showVoteApplicationModal(application) {
     if (voteProgressBar && voteStatusText) {
         const progress = (application.votes_received / application.votes_needed) * 100;
         voteProgressBar.style.width = `${Math.min(progress, 100)}%`;
-        voteStatusText.textContent = `投票进度: ${application.votes_received}/${application.votes_needed}`;
+        voteStatusText.textContent = window.i18n ?
+            window.i18n.t('group.voteProgress', { received: application.votes_received, needed: application.votes_needed }) :
+            `投票进度: ${application.votes_received}/${application.votes_needed}`;
     }
 
     // 检查当前用户是否已投票
@@ -2119,7 +2140,7 @@ async function handleCreateGroup(e) {
             .single();
 
         if (groupError) {
-            showToast('创建小组失败', 'error');
+            showToast(window.i18n ? window.i18n.t('group.createFailed') : '创建小组失败', 'error');
             return;
         }
 
@@ -2133,10 +2154,10 @@ async function handleCreateGroup(e) {
             }]);
 
         if (memberError) {
-            console.error('加入创建者失败:', memberError);
+            console.error('Error adding creator to group:', memberError);
         }
 
-        showToast('小组创建成功', 'success');
+        showToast(window.i18n ? window.i18n.t('group.createSuccess') : '小组创建成功', 'success');
         hideCreateGroupModal();
 
         if (currentActiveTab === 'groups') {
@@ -2144,7 +2165,7 @@ async function handleCreateGroup(e) {
         }
     } catch (error) {
         console.error('Create group error:', error);
-        showToast('创建小组失败', 'error');
+        showToast(window.i18n ? window.i18n.t('group.createFailed') : '创建小组失败', 'error');
     } finally {
         showLoading(false);
     }
@@ -2153,22 +2174,22 @@ async function handleCreateGroup(e) {
 // 缺失的处理函数
 function handleUserSearch() {
     console.log('User search functionality - to be implemented');
-    showToast('用户搜索功能待实现', 'info');
+    showToast(window.i18n ? window.i18n.t('common.featureNotImplemented') : '用户搜索功能待实现', 'info');
 }
 
 function handleFollowUser() {
     console.log('Follow user functionality - to be implemented');
-    showToast('关注用户功能待实现', 'info');
+    showToast(window.i18n ? window.i18n.t('common.featureNotImplemented') : '关注用户功能待实现', 'info');
 }
 
 function handleJoinGroup() {
     console.log('Join group functionality - to be implemented');
-    showToast('加入小组功能待实现', 'info');
+    showToast(window.i18n ? window.i18n.t('common.featureNotImplemented') : '加入小组功能待实现', 'info');
 }
 
 function handleLeaveGroup() {
     console.log('Leave group functionality - to be implemented');
-    showToast('离开小组功能待实现', 'info');
+    showToast(window.i18n ? window.i18n.t('common.featureNotImplemented') : '离开小组功能待实现', 'info');
 }
 
 function showShareToGroupModal(inspiration) {
@@ -2193,7 +2214,7 @@ async function loadUserGroups() {
             .eq('user_id', currentUser.user.id);
 
         if (error) {
-            console.error('加载用户小组失败:', error);
+            console.error('Error loading user groups:', error);
             return;
         }
 
@@ -2438,7 +2459,7 @@ async function loadNotifications() {
 
         if (error) {
             console.error('Error loading notifications:', error);
-            showToast('加载通知失败');
+            showToast(window.i18n ? window.i18n.t('notifications.loadFailed') : '加载通知失败');
             return;
         }
 
@@ -2450,7 +2471,7 @@ async function loadNotifications() {
 
     } catch (error) {
         console.error('Error loading notifications:', error);
-        showToast('加载通知失败');
+        showToast(window.i18n ? window.i18n.t('notifications.loadFailed') : '加载通知失败');
     } finally {
         document.getElementById('notificationsLoading').classList.add('hidden');
     }
@@ -2541,16 +2562,19 @@ function getNotificationTypeIcon(type) {
 }
 
 function getNotificationTypeText(type) {
-    const texts = {
-        'like': '点赞',
-        'comment': '评论',
-        'reply': '回复',
-        'follow': '关注',
-        'group_invitation': '小组邀请',
-        'group_application': '入组申请',
-        'group_approval': '申请通过'
-    };
-    return texts[type] || '通知';
+    if (!window.i18n) {
+        const texts = {
+            'like': '点赞',
+            'comment': '评论',
+            'reply': '回复',
+            'follow': '关注',
+            'group_invitation': '小组邀请',
+            'group_application': '入组申请',
+            'group_approval': '申请通过'
+        };
+        return texts[type] || '通知';
+    }
+    return window.i18n.t(`notifications.type.${type}`) || window.i18n.t('notifications.type.default');
 }
 
 async function handleNotificationClick(notificationId) {
@@ -2585,21 +2609,21 @@ async function handleNotificationClick(notificationId) {
 
                 if (error) {
                     console.error('Error fetching application:', error);
-                    showToast('获取申请信息失败', 'error');
+                    showToast(window.i18n ? window.i18n.t('group.getApplicationFailed') : '获取申请信息失败', 'error');
                     return;
                 }
 
                 if (applications && applications.length > 0) {
                     showVoteApplicationModal(applications[0]);
                 } else {
-                    showToast('申请不存在或已处理', 'info');
+                    showToast(window.i18n ? window.i18n.t('group.applicationNotFound') : '申请不存在或已处理', 'info');
                 }
             } else {
-                showToast('无法解析申请信息', 'error');
+                showToast(window.i18n ? window.i18n.t('group.parseApplicationFailed') : '无法解析申请信息', 'error');
             }
         } catch (error) {
             console.error('Error handling group application notification:', error);
-            showToast('处理申请通知时出错', 'error');
+            showToast(window.i18n ? window.i18n.t('notifications.handleFailed') : '处理申请通知时出错', 'error');
         }
     } else if (notification.type === 'group_approval') {
         // 处理申请通过通知 - 可以跳转到小组页面
@@ -2695,7 +2719,7 @@ function filterNotifications(filter) {
 
 async function markAllNotificationsAsRead() {
     if (unreadNotificationCount === 0) {
-        showToast('没有未读通知');
+        showToast(window.i18n ? window.i18n.t('notifications.noUnread') : '没有未读通知');
         return;
     }
 

@@ -1,5 +1,5 @@
-// Edge Function: 提交投票，包含计数、过期检查、防重复投票和通知发送
-// 处理小组申请投票的完整流程，包括计票、检查通过条件、加入小组和发送通知
+// Edge Function: Submit vote with counting, expiration check, duplicate prevention and notifications
+// Handles complete group application voting flow including vote counting, approval checking, adding members and sending notifications
 
 module.exports = async function(request) {
     // CORS headers
@@ -15,7 +15,7 @@ module.exports = async function(request) {
     }
 
     if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: '仅支持 POST 请求' }), {
+        return new Response(JSON.stringify({ error: 'Only POST method is supported' }), {
             status: 405,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -27,7 +27,7 @@ module.exports = async function(request) {
         const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
 
         if (!userToken) {
-            return new Response(JSON.stringify({ error: '未授权访问' }), {
+            return new Response(JSON.stringify({ error: 'Unauthorized access' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -42,7 +42,7 @@ module.exports = async function(request) {
         // Get authenticated user
         const { data: userData } = await client.auth.getCurrentUser();
         if (!userData?.user?.id) {
-            return new Response(JSON.stringify({ error: '用户认证失败' }), {
+            return new Response(JSON.stringify({ error: 'User authentication failed' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -53,29 +53,29 @@ module.exports = async function(request) {
         const { application_id, vote } = body;
 
         if (!application_id || typeof vote !== 'boolean') {
-            return new Response(JSON.stringify({ error: '缺少必要参数' }), {
+            return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 检查申请是否存在且未过期
+        // Check if application exists and not expired
         const { data: application, error: appError } = await client.database
             .from('group_applications')
             .select('*')
             .eq('id', application_id)
             .eq('status', 'pending')
-            .gte('expires_at', new Date().toISOString()) // 检查未过期
+            .gte('expires_at', new Date().toISOString()) // Check not expired
             .single();
 
         if (appError || !application) {
-            return new Response(JSON.stringify({ error: '申请不存在、已处理或已过期' }), {
+            return new Response(JSON.stringify({ error: 'Application does not exist, has been processed, or has expired' }), {
                 status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 检查用户是否是小组成员（只有小组成员才能投票）
+        // Check if user is a group member (only members can vote)
         const { data: membership } = await client.database
             .from('group_members')
             .select('id')
@@ -84,13 +84,13 @@ module.exports = async function(request) {
             .single();
 
         if (!membership) {
-            return new Response(JSON.stringify({ error: '只有小组成员才能投票' }), {
+            return new Response(JSON.stringify({ error: 'Only group members can vote' }), {
                 status: 403,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 检查用户是否已经投票（使用新的application_votes表）
+        // Check if user has already voted (using new application_votes table)
         const { data: existingVote } = await client.database
             .from('application_votes')
             .select('id, vote_type')
@@ -100,14 +100,14 @@ module.exports = async function(request) {
 
         if (existingVote) {
             return new Response(JSON.stringify({
-                error: `你已经投过${existingVote.vote_type === 'approve' ? '赞成' : '反对'}票了，不能重复投票或修改投票`
+                error: `You have already voted ${existingVote.vote_type === 'approve' ? 'to approve' : 'to reject'}. You cannot vote again or change your vote`
             }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 提交投票到application_votes表
+        // Submit vote to application_votes table
         const voteType = vote ? 'approve' : 'reject';
         const { error: voteError } = await client.database
             .from('application_votes')
@@ -119,13 +119,13 @@ module.exports = async function(request) {
 
         if (voteError) {
             console.error('Error submitting vote:', voteError);
-            return new Response(JSON.stringify({ error: '投票失败' }), {
+            return new Response(JSON.stringify({ error: 'Vote submission failed' }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 更新申请的投票计数（只计算赞成票）
+        // Update application vote count (only count approve votes)
         let updatedApplication = application;
         if (vote) {
             const { data: updatedApp, error: updateError } = await client.database
@@ -145,20 +145,20 @@ module.exports = async function(request) {
             }
         }
 
-        // 检查是否达到投票要求（通过条件）
+        // Check if voting requirement is met (approval condition)
         let applicationApproved = false;
         if (updatedApplication.votes_received >= updatedApplication.votes_needed) {
             try {
-                // 申请通过，自动加入小组
+                // Application approved, automatically add to group
                 await approveGroupApplication(client, updatedApplication);
                 applicationApproved = true;
             } catch (approvalError) {
                 console.error('Error approving application:', approvalError);
-                // 即使审批失败，投票仍然成功
+                // Even if approval fails, vote is still successful
             }
         }
 
-        // 计算剩余天数
+        // Calculate remaining days
         const expiresAt = new Date(application.expires_at);
         const daysRemaining = Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -171,7 +171,7 @@ module.exports = async function(request) {
             votes_needed: updatedApplication.votes_needed,
             days_remaining: daysRemaining,
             expires_at: application.expires_at,
-            message: vote ? '已投赞成票' : '已投反对票'
+            message: vote ? 'Approved' : 'Rejected'
         }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -180,7 +180,7 @@ module.exports = async function(request) {
     } catch (error) {
         console.error('Function error:', error);
         return new Response(JSON.stringify({
-            error: '内部服务器错误',
+            error: 'Internal server error',
             details: error.message
         }), {
             status: 500,
@@ -189,9 +189,9 @@ module.exports = async function(request) {
     }
 };
 
-// 处理申请通过的逻辑
+// Handle application approval logic
 async function approveGroupApplication(client, application) {
-    // 将用户添加到小组
+    // Add user to group
     const { error: memberError } = await client.database
         .from('group_members')
         .insert([{
@@ -202,10 +202,10 @@ async function approveGroupApplication(client, application) {
 
     if (memberError) {
         console.error('Error adding group member:', memberError);
-        throw new Error('添加小组成员失败');
+        throw new Error('Failed to add group member');
     }
 
-    // 获取当前小组信息并更新成员数
+    // Get current group info and update member count
     const { data: currentGroup, error: getGroupError } = await client.database
         .from('groups')
         .select('member_count, name')
@@ -223,7 +223,7 @@ async function approveGroupApplication(client, application) {
         }
     }
 
-    // 更新申请状态
+    // Update application status
     const { error: statusError } = await client.database
         .from('group_applications')
         .update({ status: 'approved' })
@@ -233,18 +233,18 @@ async function approveGroupApplication(client, application) {
         console.error('Error updating application status:', statusError);
     }
 
-    // 发送通过通知给申请者
+    // Send approval notification to applicant
     try {
-        const groupName = currentGroup?.name || '未知小组';
+        const groupName = currentGroup?.name || 'Unknown Group';
 
         await client.database
             .from('notifications')
             .insert([{
                 recipient_id: application.applicant_id,
-                sender_id: null, // 系统通知
+                sender_id: null, // System notification
                 type: 'group_approval',
-                title: '申请通过',
-                message: `恭喜！您的小组申请已通过，现在您是 "${groupName}" 的成员了`,
+                title: 'Application Approved',
+                message: `Congratulations! Your application to join "${groupName}" has been approved`,
                 related_inspiration_id: null,
                 related_comment_id: application.id
             }]);
@@ -252,7 +252,7 @@ async function approveGroupApplication(client, application) {
         console.log('Approval notification sent to applicant');
     } catch (notificationError) {
         console.error('Error sending approval notification:', notificationError);
-        // 通知发送失败不影响主要流程
+        // Notification failure does not affect main flow
     }
 
     console.log('Application approved, user added to group');

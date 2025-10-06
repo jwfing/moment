@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moment - 灵感记录</title>
+    <title>Moment - Record Your Ideas</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -414,8 +414,8 @@
                         <div class="empty-icon">
                             <i data-lucide="bell"></i>
                         </div>
-                        <h3>暂无通知</h3>
-                        <p>当有人点赞或评论你的灵感时，通知会出现在这里</p>
+                        <h3 data-i18n="notification.noNotifications">暂无通知</h3>
+                        <p data-i18n="notification.emptyHint">当有人点赞或评论你的灵感时，通知会出现在这里</p>
                     </div>
                 </div>
             </main>
@@ -507,10 +507,10 @@
                     </div>
                 </div>
                 <div class="modal-body">
-                    <div id="detailContent" class="detail-content"></div>
                     <div id="detailMeta" class="detail-meta"></div>
                     <div id="detailTags" class="detail-tags"></div>
                     <div id="detailImage" class="detail-image"></div>
+                    <div id="detailContent" class="detail-content"></div>
 
                     <!-- 点赞和评论统计 -->
                     <div class="engagement-stats">

@@ -86,6 +86,23 @@ const translations = {
             settings: '设置'
         },
 
+        // 分类
+        category: {
+            idea: '想法',
+            quote: '引言',
+            thought: '思考',
+            reflection: '思考',
+            solution: '解决方案'
+        },
+
+        // 心情
+        mood: {
+            excited: '兴奋',
+            calm: '平静',
+            frustrated: '沮丧',
+            hopeful: '充满希望'
+        },
+
         // 灵感相关
         inspiration: {
             title: '标题',
@@ -172,7 +189,8 @@ const translations = {
                 group_approval: '申请通过',
                 group_rejection: '申请拒绝'
             },
-            noNotifications: '暂无新通知',
+            noNotifications: '暂无通知',
+            emptyHint: '当有人点赞或评论你的灵感时，通知会出现在这里',
             newApplication: '有用户申请加入"{groupName}"小组，请投票决定是否同意。',
             applicationApproved: '恭喜！您加入"{groupName}"小组的申请已通过。',
             applicationRejected: '很遗憾，您加入"{groupName}"小组的申请未通过。',
@@ -347,6 +365,23 @@ const translations = {
             settings: 'Settings'
         },
 
+        // Category
+        category: {
+            idea: 'Idea',
+            quote: 'Quote',
+            thought: 'Thought',
+            reflection: 'Reflection',
+            solution: 'Solution'
+        },
+
+        // Mood
+        mood: {
+            excited: 'Excited',
+            calm: 'Calm',
+            frustrated: 'Frustrated',
+            hopeful: 'Hopeful'
+        },
+
         // Inspiration
         inspiration: {
             title: 'Title',
@@ -433,7 +468,8 @@ const translations = {
                 group_approval: 'Application Approved',
                 group_rejection: 'Application Rejected'
             },
-            noNotifications: 'No new notifications',
+            noNotifications: 'No notifications',
+            emptyHint: 'Notifications will appear here when someone likes or comments on your inspiration',
             newApplication: 'A user has applied to join "{groupName}" group, please vote to decide.',
             applicationApproved: 'Congratulations! Your application to join "{groupName}" has been approved.',
             applicationRejected: 'Sorry, your application to join "{groupName}" has been rejected.',
@@ -533,6 +569,11 @@ class I18nManager {
     // 获取当前语言
     getCurrentLang() {
         return this.currentLang;
+    }
+
+    // 获取当前 locale (用于日期格式化)
+    get locale() {
+        return this.currentLang === 'zh' ? 'zh-CN' : 'en-US';
     }
 
     // 设置语言

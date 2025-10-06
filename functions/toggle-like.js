@@ -1,5 +1,5 @@
-// Edge Function: 点赞/取消点赞灵感，包含通知发送
-// 处理点赞操作的完整流程，包括发送站内通知
+// Edge Function: Like/unlike inspiration with notification
+// Handles complete like operation flow including sending in-app notifications
 
 module.exports = async function(request) {
     // CORS headers
@@ -15,7 +15,7 @@ module.exports = async function(request) {
     }
 
     if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: '仅支持 POST 请求' }), {
+        return new Response(JSON.stringify({ error: 'Only POST method is supported' }), {
             status: 405,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -27,7 +27,7 @@ module.exports = async function(request) {
         const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
 
         if (!userToken) {
-            return new Response(JSON.stringify({ error: '未授权访问' }), {
+            return new Response(JSON.stringify({ error: 'Unauthorized access' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -42,7 +42,7 @@ module.exports = async function(request) {
         // Get authenticated user
         const { data: userData } = await client.auth.getCurrentUser();
         if (!userData?.user?.id) {
-            return new Response(JSON.stringify({ error: '用户认证失败' }), {
+            return new Response(JSON.stringify({ error: 'User authentication failed' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -53,13 +53,13 @@ module.exports = async function(request) {
         const { inspiration_id } = body;
 
         if (!inspiration_id) {
-            return new Response(JSON.stringify({ error: '缺少灵感ID' }), {
+            return new Response(JSON.stringify({ error: 'Missing inspiration ID' }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 检查是否已经点赞
+        // Check if already liked
         const { data: existingLike } = await client.database
             .from('likes')
             .select('id')
@@ -71,7 +71,7 @@ module.exports = async function(request) {
         let shouldNotify = false;
 
         if (existingLike) {
-            // 取消点赞
+            // Unlike
             const { error } = await client.database
                 .from('likes')
                 .delete()
@@ -80,7 +80,7 @@ module.exports = async function(request) {
 
             if (error) {
                 console.error('Error removing like:', error);
-                return new Response(JSON.stringify({ error: '取消点赞失败' }), {
+                return new Response(JSON.stringify({ error: 'Failed to unlike' }), {
                     status: 500,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
@@ -88,7 +88,7 @@ module.exports = async function(request) {
 
             action = 'unliked';
         } else {
-            // 添加点赞
+            // Like
             const { error } = await client.database
                 .from('likes')
                 .insert([{
@@ -98,7 +98,7 @@ module.exports = async function(request) {
 
             if (error) {
                 console.error('Error adding like:', error);
-                return new Response(JSON.stringify({ error: '点赞失败' }), {
+                return new Response(JSON.stringify({ error: 'Failed to like' }), {
                     status: 500,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
@@ -108,10 +108,10 @@ module.exports = async function(request) {
             shouldNotify = true;
         }
 
-        // 如果是点赞，发送通知给作者
+        // If liked, send notification to author
         if (shouldNotify) {
             try {
-                // 获取灵感作者信息
+                // Get inspiration author information
                 const { data: inspiration } = await client.database
                     .from('inspirations')
                     .select('user_id, title')
@@ -119,24 +119,24 @@ module.exports = async function(request) {
                     .single();
 
                 if (inspiration && inspiration.user_id !== userData.user.id) {
-                    // 获取当前用户的昵称
+                    // Get current user's nickname
                     const { data: userProfile } = await client.database
                         .from('profiles')
                         .select('nickname')
                         .eq('id', userData.user.id)
                         .single();
 
-                    const userNickname = userProfile?.nickname || '某位用户';
+                    const userNickname = userProfile?.nickname || 'Someone';
 
-                    // 创建通知
+                    // Create notification
                     await client.database
                         .from('notifications')
                         .insert([{
                             user_id: inspiration.user_id,
                             sender_id: userData.user.id,
                             type: 'like',
-                            title: '有人点赞了你的灵感',
-                            message: `${userNickname} 点赞了你的灵感 "${inspiration.title}"`,
+                            title: 'Someone liked your inspiration',
+                            message: `${userNickname} liked your inspiration "${inspiration.title}"`,
                             related_id: inspiration_id,
                             is_read: false
                         }]);
@@ -145,11 +145,11 @@ module.exports = async function(request) {
                 }
             } catch (notificationError) {
                 console.error('Error sending notification:', notificationError);
-                // 通知发送失败不影响点赞操作，继续执行
+                // Notification failure does not affect like operation, continue execution
             }
         }
 
-        // 获取更新后的点赞统计
+        // Get updated like count
         const { data: likesCount } = await client.database
             .from('likes')
             .select('id', { count: 'exact' })
@@ -167,7 +167,7 @@ module.exports = async function(request) {
     } catch (error) {
         console.error('Function error:', error);
         return new Response(JSON.stringify({
-            error: '内部服务器错误',
+            error: 'Internal server error',
             details: error.message
         }), {
             status: 500,

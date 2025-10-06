@@ -1,5 +1,5 @@
-// Edge Function: 创建带位置和天气信息的灵感
-// 使用免费的 IP 定位和天气 API
+// Edge Function: Create inspiration with location and weather information
+// Uses free IP location and weather APIs
 
 module.exports = async function(request) {
     // CORS headers
@@ -20,7 +20,7 @@ module.exports = async function(request) {
         const userToken = authHeader ? authHeader.replace('Bearer ', '') : null;
 
         if (!userToken) {
-            return new Response(JSON.stringify({ error: '未授权访问' }), {
+            return new Response(JSON.stringify({ error: 'Unauthorized access' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -35,7 +35,7 @@ module.exports = async function(request) {
         // Get authenticated user
         const { data: userData } = await client.auth.getCurrentUser();
         if (!userData?.user?.id) {
-            return new Response(JSON.stringify({ error: '用户认证失败' }), {
+            return new Response(JSON.stringify({ error: 'User authentication failed' }), {
                 status: 401,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -45,34 +45,34 @@ module.exports = async function(request) {
         const body = await request.json();
         const { title, content, tags, category, mood, image_url, is_private } = body;
 
-        // 获取用户 IP 地址
+        // Get user IP address
         let clientIP = request.headers.get('cf-connecting-ip') ||
                       request.headers.get('x-forwarded-for') ||
                       request.headers.get('x-real-ip') ||
                       '127.0.0.1'; // fallback for local development
 
-        // 如果 x-forwarded-for 包含多个IP，取第一个公网IP
+        // If x-forwarded-for contains multiple IPs, take the first public IP
         if (clientIP.includes(',')) {
             const ips = clientIP.split(',').map(ip => ip.trim());
-            // 取第一个不是私有IP的地址
+            // Take the first non-private IP
             clientIP = ips.find(ip => {
-                // 过滤掉私有IP地址和本地地址
+                // Filter out private IPs and local addresses
                 return !ip.startsWith('10.') &&
                        !ip.startsWith('192.168.') &&
                        !ip.startsWith('172.') &&
                        ip !== '127.0.0.1' &&
                        ip !== '::1';
-            }) || ips[0]; // 如果都是私有IP，使用第一个
+            }) || ips[0]; // If all are private, use the first one
         }
 
         console.log('Client IP:', clientIP);
 
-        // 获取地理位置信息
+        // Get geographic location
         let locationData = null;
         let weatherData = null;
 
         try {
-            // 使用 ip-api.com 免费服务获取位置
+            // Use ip-api.com free service for location
             const locationUrl = `http://ip-api.com/json/${clientIP}?fields=status,message,country,regionName,city,lat,lon`;
             console.log('Fetching location from:', locationUrl);
 
@@ -102,7 +102,7 @@ module.exports = async function(request) {
             console.error('Location API error:', error);
         }
 
-        // 获取天气信息 (使用 wttr.in 免费API)
+        // Get weather information (using wttr.in free API)
         if (locationData && locationData.city) {
             try {
                 const weatherUrl = `https://wttr.in/${encodeURIComponent(locationData.city)}?format=j1`;
@@ -133,11 +133,11 @@ module.exports = async function(request) {
                 }
             } catch (error) {
                 console.error('Weather API error:', error);
-                // 如果天气 API 失败，使用模拟数据
+                // If weather API fails, use fallback data
                 weatherData = {
-                    condition: '未知',
+                    condition: 'Unknown',
                     temperature: null,
-                    description: '天气信息获取失败',
+                    description: 'Weather information unavailable',
                     humidity: null
                 };
             }
@@ -145,7 +145,7 @@ module.exports = async function(request) {
             console.log('No location data available for weather lookup');
         }
 
-        // 创建灵感记录
+        // Create inspiration record
         const inspirationData = {
             user_id: userData.user.id,
             title,
@@ -165,7 +165,7 @@ module.exports = async function(request) {
             weather_humidity: weatherData?.humidity || null
         };
 
-        // 保存到数据库
+        // Save to database
         const { data: inspiration, error } = await client.database
             .from('inspirations')
             .insert([inspirationData])
@@ -174,13 +174,13 @@ module.exports = async function(request) {
 
         if (error) {
             console.error('Database error:', error);
-            return new Response(JSON.stringify({ error: '保存灵感失败', details: error.message }), {
+            return new Response(JSON.stringify({ error: 'Failed to save inspiration', details: error.message }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        // 返回成功结果
+        // Return success result
         return new Response(JSON.stringify({
             success: true,
             data: inspiration,
@@ -194,7 +194,7 @@ module.exports = async function(request) {
     } catch (error) {
         console.error('Function error:', error);
         return new Response(JSON.stringify({
-            error: '内部服务器错误',
+            error: 'Internal server error',
             details: error.message
         }), {
             status: 500,
