@@ -553,6 +553,10 @@ function fillInspirationForm(inspiration) {
 async function handleInspirationSubmit(e) {
     e.preventDefault();
 
+    // 🕐 开始性能跟踪
+    const perfStart = performance.now();
+    console.log('📊 [Performance] 发布灵感开始');
+
     const title = document.getElementById('inspirationTitle').value;
     const content = document.getElementById('inspirationContent').value;
     const category = document.getElementById('inspirationCategory').value;
@@ -568,6 +572,9 @@ async function handleInspirationSubmit(e) {
 
         // Upload image if provided
         if (imageFile) {
+            const uploadStart = performance.now();
+            console.log(`📊 [Performance] 开始上传图片 (${(imageFile.size / 1024).toFixed(2)} KB)`);
+
             const { data: uploadData, error: uploadError } = await client.storage
                 .from('inspiration-files')
                 .uploadAuto(imageFile);
@@ -578,6 +585,8 @@ async function handleInspirationSubmit(e) {
             }
 
             imageUrl = uploadData.url;
+            const uploadTime = performance.now() - uploadStart;
+            console.log(`📊 [Performance] 图片上传完成: ${uploadTime.toFixed(2)}ms`);
         }
 
         const inspirationData = {
@@ -593,6 +602,9 @@ async function handleInspirationSubmit(e) {
 
         if (currentEditingInspiration) {
             // Update existing inspiration
+            const updateStart = performance.now();
+            console.log('📊 [Performance] 开始更新灵感');
+
             const { data, error } = await client.database
                 .from('inspirations')
                 .update(inspirationData)
@@ -605,12 +617,21 @@ async function handleInspirationSubmit(e) {
                 return;
             }
 
+            const updateTime = performance.now() - updateStart;
+            console.log(`📊 [Performance] 更新灵感完成: ${updateTime.toFixed(2)}ms`);
+
             showToast(window.i18n ? window.i18n.t('inspiration.updateSuccess') : '灵感更新成功！', 'success');
         } else {
             // Create new inspiration with location and weather info
+            const createStart = performance.now();
+            console.log('📊 [Performance] 开始创建灵感 (调用 Edge Function)');
+
             const { data: functionResult, error } = await client.functions.invoke('create-inspiration', {
                 body: inspirationData
             });
+
+            const createTime = performance.now() - createStart;
+            console.log(`📊 [Performance] Edge Function 调用完成: ${createTime.toFixed(2)}ms`);
 
             if (error) {
                 console.error('Function invoke error:', error);
@@ -640,8 +661,19 @@ async function handleInspirationSubmit(e) {
         }
 
         hideInspirationModal();
+
+        const reloadStart = performance.now();
+        console.log('📊 [Performance] 开始重新加载灵感列表');
         await loadInspirations();
+        const reloadTime = performance.now() - reloadStart;
+        console.log(`📊 [Performance] 重新加载完成: ${reloadTime.toFixed(2)}ms`);
+        // 📊 总耗时统计
+        const totalTime = performance.now() - perfStart;
+        console.log(`\n✅ [Performance] 发布灵感总耗时: ${totalTime.toFixed(2)}ms (${(totalTime / 1000).toFixed(2)}秒)\n`);
+
     } catch (error) {
+        const totalTime = performance.now() - perfStart;
+        console.error(`❌ [Performance] 发布失败，总耗时: ${totalTime.toFixed(2)}ms`);
         console.error('Save inspiration error:', error);
         showToast(window.i18n ? window.i18n.t('social.operationFailedRetry') : '操作失败，请稍后重试', 'error');
     } finally {
@@ -1292,7 +1324,21 @@ async function loadGroups() {
             console.error('Error loading discover groups:', allGroupsError);
         } else {
             const myGroupIds = myGroups.map(g => g.id);
-            discoverGroups = allGroupsData?.filter(group => !myGroupIds.includes(group.id)) || [];
+            const filteredGroups = allGroupsData?.filter(group => !myGroupIds.includes(group.id)) || [];
+
+            // 为每个群组获取真实的成员数量
+            discoverGroups = await Promise.all(filteredGroups.map(async (group) => {
+                const { data: members } = await client.database
+                    .from('group_members')
+                    .select('id')
+                    .eq('group_id', group.id);
+
+                return {
+                    ...group,
+                    real_member_count: members?.length || 0
+                };
+            }));
+
             renderDiscoverGroups();
         }
     } catch (error) {
@@ -1332,17 +1378,21 @@ function renderDiscoverGroups() {
         return;
     }
 
-    container.innerHTML = discoverGroups.map(group => `
+    container.innerHTML = discoverGroups.map(group => {
+        // 使用真实的成员计数（从单独查询获取）
+        const realMemberCount = group.real_member_count || 0;
+        return `
         <div class="group-card" onclick="showGroupDetail('${group.id}')">
             <div class="group-avatar">${group.avatar_url ? `<img src="${group.avatar_url}" alt="${group.name}">` : group.name.charAt(0)}</div>
             <div class="group-name">${escapeHtml(group.name)}</div>
             <div class="group-description">${escapeHtml(group.description || '')}</div>
             <div class="group-meta">
-                <span>${window.i18n ? window.i18n.t('group.membersCount', { count: group.member_count || 0 }) : `${group.member_count} 成员`}</span>
+                <span>${window.i18n ? window.i18n.t('group.membersCount', { count: realMemberCount }) : `${realMemberCount} 成员`}</span>
                 <button class="btn-group-apply" onclick="event.stopPropagation(); showApplyGroupModal('${group.id}', ${escapeHtml(JSON.stringify(group))})">${window.i18n ? window.i18n.t('group.applyToJoin') : '申请加入'}</button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // 关注功能
@@ -1643,15 +1693,24 @@ async function showGroupDetail(groupId) {
             .from('group_members')
             .select('*')
             .eq('group_id', groupId)
-            .eq('user_id', currentUser.user.id)
-            .single();
+            .eq('user_id', currentUser.user.id);
 
-        const isMember = memberData && !memberError;
+        // memberData 是数组，如果有记录说明是成员
+        const isMember = memberData && memberData.length > 0;
         const canViewPosts = !groupData.is_private || isMember;
+
+        // 获取真实的成员数量
+        const { data: allMembers } = await client.database
+            .from('group_members')
+            .select('id')
+            .eq('group_id', groupId);
+
+        const realMemberCount = allMembers?.length || 0;
 
         // 显示小组基本信息
         document.getElementById('groupDetailName').textContent = groupData.name;
         document.getElementById('groupDetailDescription').textContent = groupData.description || (window.i18n ? window.i18n.t('group.noDescription') : '暂无描述');
+        document.getElementById('groupMemberCount').textContent = realMemberCount;
 
         const avatarImg = document.getElementById('groupDetailAvatar');
         if (groupData.avatar_url) {

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moment - Record Your Ideas</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -700,7 +702,7 @@
         <div id="applyGroupModal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>申请加入小组</h3>
+                    <h3 data-i18n="group.applyToJoinTitle">申请加入小组</h3>
                     <button class="modal-close" onclick="hideApplyGroupModal()">&times;</button>
                 </div>
                 <form id="applyGroupForm" class="modal-body">
@@ -713,23 +715,23 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="applicationMessage">申请理由</label>
-                        <textarea id="applicationMessage" placeholder="请简单介绍一下自己，说明为什么想加入这个小组..." rows="4" required></textarea>
+                        <label for="applicationMessage" data-i18n="group.applicationReason">申请理由</label>
+                        <textarea id="applicationMessage" data-i18n="group.applicationPlaceholder" placeholder="请简单介绍一下自己，说明为什么想加入这个小组..." rows="4" required></textarea>
                     </div>
 
                     <div class="voting-info">
                         <div class="info-card">
                             <i data-lucide="users"></i>
                             <div>
-                                <h5>投票机制</h5>
+                                <h5 data-i18n="group.votingMechanism">投票机制</h5>
                                 <p id="votingRequirement"></p>
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-actions">
-                        <button type="button" class="btn-secondary" onclick="hideApplyGroupModal()">取消</button>
-                        <button type="submit" class="btn-primary">提交申请</button>
+                        <button type="button" class="btn-secondary" onclick="hideApplyGroupModal()" data-i18n="common.cancel">取消</button>
+                        <button type="submit" class="btn-primary" data-i18n="group.submitApplication">提交申请</button>
                     </div>
                 </form>
             </div>

@@ -173,7 +173,14 @@ const translations = {
             privateGroupContent: '这是私有小组，只有成员可以查看内容',
             noGroupPosts: '小组内还没有分享的灵感',
             membersCount: '{count} 位成员',
-            applyToJoin: '申请加入'
+            applyToJoin: '申请加入',
+            applyToJoinTitle: '申请加入小组',
+            applicationReason: '申请理由',
+            applicationPlaceholder: '请简单介绍一下自己，说明为什么想加入这个小组...',
+            votingMechanism: '投票机制',
+            submitApplication: '提交申请',
+            votingRequirementHalf: '小组现有 {total} 名成员，需要超过一半成员（{required} 票）同意您的申请。',
+            votingRequirementThird: '小组现有 {total} 名成员，需要超过三分之一成员（{required} 票）同意您的申请。'
         },
 
         // 通知相关
@@ -452,7 +459,14 @@ const translations = {
             privateGroupContent: 'This is a private group, only members can view the content',
             noGroupPosts: 'No shared inspirations in this group yet',
             membersCount: '{count} members',
-            applyToJoin: 'Apply to Join'
+            applyToJoin: 'Apply to Join',
+            applyToJoinTitle: 'Apply to Join Group',
+            applicationReason: 'Application Reason',
+            applicationPlaceholder: 'Please introduce yourself briefly and explain why you want to join this group...',
+            votingMechanism: 'Voting Mechanism',
+            submitApplication: 'Submit Application',
+            votingRequirementHalf: 'The group currently has {total} members. More than half of the members ({required} votes) need to approve your application.',
+            votingRequirementThird: 'The group currently has {total} members. More than one-third of the members ({required} votes) need to approve your application.'
         },
 
         // Notifications
